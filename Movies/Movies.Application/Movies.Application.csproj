@@ -15,7 +15,9 @@
     </ItemGroup>
 
     <ItemGroup>
-      <Folder Include="Repositories\Movie\" />
+      <Folder Include="Models\Aggregates\" />
+      <Folder Include="Models\Command\" />
+      <Folder Include="Models\Query\" />
     </ItemGroup>
 
 </Project>

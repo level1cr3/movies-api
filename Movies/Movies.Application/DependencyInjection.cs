@@ -3,6 +3,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Movies.Application.Data;
 using Movies.Application.Repositories;
+using Movies.Application.Repositories.MovieRepo;
 
 namespace Movies.Application;
 
@@ -23,5 +24,8 @@ public static class DependencyInjection
         services.AddDbContext<ApplicationDbContext>(options => options.UseNpgsql(dbConnection).UseSnakeCaseNamingConvention());
 
         services.AddScoped<IUnitOfWork, UnitOfWork>();
+        services.AddScoped<IMovieRepository, MovieRepository>();
     }
+    
+    
 }
