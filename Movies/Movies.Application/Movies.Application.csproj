@@ -15,9 +15,9 @@
     </ItemGroup>
 
     <ItemGroup>
-      <Folder Include="Models\Aggregates\" />
-      <Folder Include="Models\Command\" />
-      <Folder Include="Models\Query\" />
+      <Folder Include="Models\Aggregates\MovieAggregates\" />
+      <Folder Include="Models\Commands\MovieCommands\" />
+      <Folder Include="Models\Queres\MovieQueries\" />
     </ItemGroup>
 
 </Project>

@@ -1,4 +1,4 @@
-﻿namespace Movies.Contracts.Responses.Movies;
+﻿namespace Movies.Contracts.Responses.MovieResponse;
 
 public record MovieResponse
 {

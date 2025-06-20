@@ -2,7 +2,7 @@
 using Movies.Application.Data;
 using Movies.Application.Models.Entities;
 
-namespace Movies.Application.Repositories.MovieRepo;
+namespace Movies.Application.Repositories.MovieRepository;
 
 public class MovieRepository(ApplicationDbContext db) : IMovieRepository
 {

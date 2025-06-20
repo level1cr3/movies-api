@@ -1,4 +1,4 @@
-﻿namespace Movies.Contracts.Requests.Movies;
+﻿namespace Movies.Contracts.Requests.MovieRequest;
 
 public record GetMovieRequest
 {
