@@ -7,8 +7,7 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddOpenApi();
 builder.Services.AddControllers();
 
-builder.Services.AddApplication();
-builder.Services.AddDatabase(builder.Configuration);
+builder.Services.AddApplication(builder.Configuration);
 
 var app = builder.Build();
 
