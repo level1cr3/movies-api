@@ -2,9 +2,9 @@
 using Movies.Application.Data;
 using Movies.Application.Models.Entities;
 
-namespace Movies.Application.Repositories.MovieRepository;
+namespace Movies.Application.Repositories.MovieRepository.Query;
 
-public class MovieRepository(ApplicationDbContext db) : IMovieRepository
+public class MovieQueryRepository(ApplicationDbContext db) : IMovieQueryRepository
 {
     public async Task<Movie?> GetByIdAsync(Guid id, CancellationToken cancellationToken = default)
     {
@@ -20,29 +20,7 @@ public class MovieRepository(ApplicationDbContext db) : IMovieRepository
     {
         return await db.Movie.ToListAsync(cancellationToken);
     }
-
-    void IMovieRepository.Create(Movie movie, CancellationToken cancellationToken)
-    {
-        db.Movie.Add(movie);
-    }
-
-    public void Update(Movie movie, CancellationToken cancellationToken = default)
-    {
-        db.Movie.Update(movie);
-    }
-
-    public async Task Delete(Guid id, CancellationToken cancellationToken = default)
-    {
-       var movie = await db.Movie.FirstOrDefaultAsync(m => m.Id == id, cancellationToken);
-       
-       if (movie is null)
-       {
-           return;
-       }
-       
-       db.Movie.Remove(movie);
-    } 
-
+    
     public async Task<bool> ExistsByIdAsync(Guid id, CancellationToken cancellationToken = default)
     {
         return await db.Movie.AnyAsync(m => m.Id == id, cancellationToken);
