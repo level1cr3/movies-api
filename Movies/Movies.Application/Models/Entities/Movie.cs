@@ -4,11 +4,13 @@ namespace Movies.Application.Models.Entities;
 
 public class Movie
 {
-    public required Guid Id { get; set; }
+    public required Guid Id { get; init; }
 
-    [MaxLength(200)] public required string Title { get; set; }
+    [MaxLength(200)] 
+    public required string Title { get; init; }
 
-    public required int YearOfRelease { get; set; }
+    public required int YearOfRelease { get; init; }
 
-    [MaxLength(250)] public required string Slug { get; set; }
+    [MaxLength(250)] 
+    public required string Slug { get; init; }
 }
