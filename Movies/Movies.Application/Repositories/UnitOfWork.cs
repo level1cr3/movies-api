@@ -2,7 +2,7 @@
 
 namespace Movies.Application.Repositories;
 
-public class UnitOfWork(ApplicationDbContext db) : IUnitOfWork
+internal sealed class UnitOfWork(ApplicationDbContext db) : IUnitOfWork
 {
     public async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
     {

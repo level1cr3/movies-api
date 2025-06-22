@@ -1,24 +1,30 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Movies.Application.Data;
-using Movies.Application.Models.Entities;
+using Movies.Application.Mappings;
+using Movies.Application.Models.Aggregates.MovieAggregates;
 
 namespace Movies.Application.Repositories.MovieRepository.Query;
 
-public class MovieQueryRepository(ApplicationDbContext db) : IMovieQueryRepository
+internal sealed class MovieQueryRepository(ApplicationDbContext db) : IMovieQueryRepository
 {
-    public async Task<Movie?> GetByIdAsync(Guid id, CancellationToken cancellationToken = default)
+    public async Task<MovieAggregate?> GetByIdAsync(Guid id, CancellationToken cancellationToken = default)
     {
-        return await db.Movie.FirstOrDefaultAsync(m => m.Id == id, cancellationToken);
+        return await db.Movie.Where(m => m.Id == id)
+            .Select(m => m.ToMovieAggregate())
+            .FirstOrDefaultAsync(cancellationToken);
     }
 
-    public async Task<Movie?> GetBySlugAsync(string slug, CancellationToken cancellationToken = default)
+    public async Task<MovieAggregate?> GetBySlugAsync(string slug, CancellationToken cancellationToken = default)
     {
-        return await db.Movie.FirstOrDefaultAsync(m => m.Slug == slug, cancellationToken);
+        return await db.Movie.Where(m => m.Slug == slug)
+            .Select(m => m.ToMovieAggregate())
+            .FirstOrDefaultAsync(cancellationToken);
     }
 
-    public async Task<IEnumerable<Movie>> GetAllAsync(CancellationToken cancellationToken = default)
+    public async Task<MovieAggregateList> GetAllAsync(CancellationToken cancellationToken = default)
     {
-        return await db.Movie.ToListAsync(cancellationToken);
+       var movies = await db.Movie.ToListAsync(cancellationToken);
+       return movies.ToMovieAggregateList();
     }
     
     public async Task<bool> ExistsByIdAsync(Guid id, CancellationToken cancellationToken = default)

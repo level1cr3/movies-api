@@ -4,9 +4,9 @@ namespace Movies.Application.Repositories.MovieRepository.Command;
 
 internal interface IMovieCommandRepository
 {
-    void Create(Movie movie, CancellationToken cancellationToken = default);
+    void Create(Movie movie);
 
-    void Update(Movie movie, CancellationToken cancellationToken = default);
+    void Update(Movie movie);
 
-    void Delete(Movie movie, CancellationToken cancellationToken = default);
+    void Delete(Movie movie);
 }

@@ -1,6 +1,6 @@
 ﻿namespace Movies.Application.Repositories;
 
-public interface IUnitOfWork
+internal interface IUnitOfWork
 {
     Task<int> SaveChangesAsync(CancellationToken cancellationToken = default);
 }

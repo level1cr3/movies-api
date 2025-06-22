@@ -1,14 +1,14 @@
-﻿using Movies.Application.Models.Entities;
+﻿using Movies.Application.Models.Aggregates.MovieAggregates;
 
 namespace Movies.Application.Repositories.MovieRepository.Query;
 
-public interface IMovieQueryRepository
+internal interface IMovieQueryRepository
 {
-    Task<Movie?> GetByIdAsync(Guid id, CancellationToken cancellationToken = default);
+    Task<MovieAggregate?> GetByIdAsync(Guid id, CancellationToken cancellationToken = default);
     
-    Task<Movie?> GetBySlugAsync(string slug, CancellationToken cancellationToken = default);
+    Task<MovieAggregate?> GetBySlugAsync(string slug, CancellationToken cancellationToken = default);
 
-    Task<IEnumerable<Movie>> GetAllAsync(CancellationToken cancellationToken = default);
+    Task<MovieAggregateList> GetAllAsync(CancellationToken cancellationToken = default);
     
     Task<bool> ExistsByIdAsync(Guid id, CancellationToken cancellationToken = default);
     
