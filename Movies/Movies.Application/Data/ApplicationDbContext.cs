@@ -5,7 +5,7 @@ namespace Movies.Application.Data;
 
 internal class ApplicationDbContext(DbContextOptions options) : DbContext(options)
 {
-    public DbSet<Movie> Movie { get; set; }
+    public DbSet<Movie> Movies { get; set; }
 
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)

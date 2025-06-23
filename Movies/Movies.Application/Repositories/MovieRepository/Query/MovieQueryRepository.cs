@@ -9,31 +9,31 @@ internal sealed class MovieQueryRepository(ApplicationDbContext db) : IMovieQuer
 {
     public async Task<MovieAggregate?> GetByIdAsync(Guid id, CancellationToken cancellationToken = default)
     {
-        return await db.Movie.Where(m => m.Id == id)
+        return await db.Movies.Where(m => m.Id == id)
             .Select(m => m.ToMovieAggregate())
             .FirstOrDefaultAsync(cancellationToken);
     }
 
     public async Task<MovieAggregate?> GetBySlugAsync(string slug, CancellationToken cancellationToken = default)
     {
-        return await db.Movie.Where(m => m.Slug == slug)
+        return await db.Movies.Where(m => m.Slug == slug)
             .Select(m => m.ToMovieAggregate())
             .FirstOrDefaultAsync(cancellationToken);
     }
 
     public async Task<MovieAggregateList> GetAllAsync(CancellationToken cancellationToken = default)
     {
-       var movies = await db.Movie.ToListAsync(cancellationToken);
+       var movies = await db.Movies.ToListAsync(cancellationToken);
        return movies.ToMovieAggregateList();
     }
     
     public async Task<bool> ExistsByIdAsync(Guid id, CancellationToken cancellationToken = default)
     {
-        return await db.Movie.AnyAsync(m => m.Id == id, cancellationToken);
+        return await db.Movies.AnyAsync(m => m.Id == id, cancellationToken);
     }
 
     public async Task<bool> ExistsBySlugAsync(string slug, CancellationToken cancellationToken = default)
     {
-        return await db.Movie.AnyAsync(m => m.Slug == slug, cancellationToken);
+        return await db.Movies.AnyAsync(m => m.Slug == slug, cancellationToken);
     }
 }

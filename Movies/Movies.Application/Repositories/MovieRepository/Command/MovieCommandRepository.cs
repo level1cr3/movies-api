@@ -7,16 +7,16 @@ internal sealed class MovieCommandRepository(ApplicationDbContext db) : IMovieCo
 {
     public void Create(Movie movie)
     {
-        db.Movie.Add(movie);
+        db.Movies.Add(movie);
     }
 
     public void Update(Movie movie)
     {
-        db.Movie.Update(movie);
+        db.Movies.Update(movie);
     }
 
     public void Delete(Movie movie)
     {
-        db.Movie.Remove(movie);
+        db.Movies.Remove(movie);
     }
 }
