@@ -1,4 +1,5 @@
 using Movies.Application;
+using Scalar.AspNetCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -14,7 +15,13 @@ var app = builder.Build();
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
-    app.MapOpenApi();
+    // default path is /openapi/v1.json for mapOpenApi();
+    app.MapOpenApi(pattern:"api/document.json"); 
+    app.MapScalarApiReference(options =>
+    {
+        options.Title = "Movies API";
+        options.OpenApiRoutePattern = "/api/document.json";
+    });
 }
 
 app.UseHttpsRedirection();
