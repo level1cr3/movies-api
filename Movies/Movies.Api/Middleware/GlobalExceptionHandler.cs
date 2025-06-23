@@ -23,6 +23,11 @@ public class GlobalExceptionHandler : IExceptionHandler
                 Status = StatusCodes.Status400BadRequest,
                 Type = "https://datatracker.ietf.org/doc/html/rfc7231#section-6.5.1", // link documentation for error if you have one.
                 Errors = validationErrors,
+                Instance = httpContext.Request.Path,
+                Extensions =
+                {
+                    ["traceId"] = httpContext.TraceIdentifier
+                }
             };
 
             httpContext.Response.StatusCode = StatusCodes.Status400BadRequest;
@@ -31,6 +36,26 @@ public class GlobalExceptionHandler : IExceptionHandler
             return true;
         }
 
-        return false;
+        
+        // for all other server errors
+        // var error = exception.Message; for logging the errors.
+
+        var problemDetails = new ProblemDetails
+        {
+            Title = "An unexpected error occurred.",
+            Status = StatusCodes.Status500InternalServerError,
+            Type = "https://datatracker.ietf.org/doc/html/rfc7231#section-6.6.1", // can comment this if not allowed to put outside link.
+            Detail = "An internal server error occurred. Please contact support with the trace ID.",
+            Instance = httpContext.Request.Path,
+            Extensions =
+            {
+                ["traceId"] = httpContext.TraceIdentifier
+            }
+        };
+
+        httpContext.Response.StatusCode = StatusCodes.Status500InternalServerError;
+        httpContext.Response.ContentType = "application/problem+json";
+        await httpContext.Response.WriteAsJsonAsync(problemDetails, cancellationToken);
+        return true;
     }
 }
