@@ -1,4 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using FluentValidation;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Movies.Application.Data;
@@ -15,6 +16,8 @@ public static class DependencyInjection
     {
         AddPersistence(services, configuration);
         AddServices(services);
+
+        services.AddValidatorsFromAssembly(typeof(IApplicationAssemblyMarker).Assembly);
         
         return services;
     }

@@ -1,4 +1,5 @@
-﻿using Movies.Application.Mappings;
+﻿using FluentValidation;
+using Movies.Application.Mappings;
 using Movies.Application.Models.Aggregates.MovieAggregates;
 using Movies.Application.Models.Commands.MovieCommands;
 using Movies.Application.Models.Queries.MovieQueries;
@@ -11,15 +12,22 @@ namespace Movies.Application.Services.MovieService;
 internal sealed class MovieService(
     IMovieQueryRepository queryRepository,
     IMovieCommandRepository commandRepository,
-    IUnitOfWork unitOfWork) : IMovieService
+    IUnitOfWork unitOfWork,
+    IValidator<GetMovieByIdQuery> getMovieByIdValidator,
+    IValidator<CreateMovieCommand> createMovieValidator) : IMovieService
 {
-    public Task<MovieAggregate?> GetByIdAsync(GetMovieByIdQuery query, CancellationToken cancellationToken = default)
+    public async Task<MovieAggregate?> GetByIdAsync(GetMovieByIdQuery query,
+        CancellationToken cancellationToken = default)
     {
-       return queryRepository.GetByIdAsync(query.Id,cancellationToken);
+        await getMovieByIdValidator.ValidateAndThrowAsync(query, cancellationToken: cancellationToken);
+
+        return await queryRepository.GetByIdAsync(query.Id, cancellationToken);
     }
 
     public async Task<Guid?> CreateAsync(CreateMovieCommand command, CancellationToken cancellationToken = default)
     {
+        await createMovieValidator.ValidateAndThrowAsync(command, cancellationToken);
+        
         var movie = command.ToMovie();
         commandRepository.Create(movie);
         var result = await unitOfWork.SaveChangesAsync(cancellationToken);

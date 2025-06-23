@@ -1,18 +1,25 @@
+using Movies.Api.Middleware;
 using Movies.Application;
 using Scalar.AspNetCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
-// Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
 builder.Services.AddOpenApi();
 builder.Services.AddControllers();
 
 builder.Services.AddApplication(builder.Configuration);
 
+builder.Services.AddProblemDetails();
+builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
+
+
+
+
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
+app.UseExceptionHandler();
+app.UseHttpsRedirection();
+
 if (app.Environment.IsDevelopment())
 {
     // default path is /openapi/v1.json for mapOpenApi();
@@ -23,8 +30,6 @@ if (app.Environment.IsDevelopment())
         options.OpenApiRoutePattern = "/api/document.json";
     });
 }
-
-app.UseHttpsRedirection();
 
 
 app.MapControllers();
