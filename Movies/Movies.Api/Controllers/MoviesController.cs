@@ -42,7 +42,7 @@ public class MoviesController(IMovieService movieService) : ControllerBase
             return BadRequest();
         }
 
-        return CreatedAtAction(nameof(Get), new { id = movieId });
+        return CreatedAtAction(nameof(Get), new { id = movieId.Value }, null);
     }
     
 }
