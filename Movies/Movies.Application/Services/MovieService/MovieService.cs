@@ -18,12 +18,12 @@ internal sealed class MovieService(
        return queryRepository.GetByIdAsync(query.Id,cancellationToken);
     }
 
-    public async Task<bool> CreateAsync(CreateMovieCommand command, CancellationToken cancellationToken = default)
+    public async Task<Guid?> CreateAsync(CreateMovieCommand command, CancellationToken cancellationToken = default)
     {
         var movie = command.ToMovie();
         commandRepository.Create(movie);
         var result = await unitOfWork.SaveChangesAsync(cancellationToken);
-        return result > 0;
+        return result > 0 ? movie.Id : null;
     }
     
 }

@@ -8,5 +8,5 @@ public interface IMovieService
 {
     Task<MovieAggregate?> GetByIdAsync(GetMovieByIdQuery query, CancellationToken cancellationToken = default);
 
-    Task<bool> CreateAsync(CreateMovieCommand command, CancellationToken cancellationToken = default);
+    Task<Guid?> CreateAsync(CreateMovieCommand command, CancellationToken cancellationToken = default);
 }
