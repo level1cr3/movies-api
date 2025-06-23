@@ -26,7 +26,8 @@ public class GlobalExceptionHandler : IExceptionHandler
                 Instance = httpContext.Request.Path,
                 Extensions =
                 {
-                    ["traceId"] = httpContext.TraceIdentifier
+                    ["traceId"] = httpContext.TraceIdentifier,
+                    ["method"] = httpContext.Request.Method
                 }
             };
 
@@ -44,12 +45,13 @@ public class GlobalExceptionHandler : IExceptionHandler
         {
             Title = "An unexpected error occurred.",
             Status = StatusCodes.Status500InternalServerError,
-            Type = "https://datatracker.ietf.org/doc/html/rfc7231#section-6.6.1", // can comment this if not allowed to put outside link.
+            Type = "https://datatracker.ietf.org/doc/html/rfc7231#section-6.6.1", 
             Detail = "An internal server error occurred. Please contact support with the trace ID.",
             Instance = httpContext.Request.Path,
             Extensions =
             {
-                ["traceId"] = httpContext.TraceIdentifier
+                ["traceId"] = httpContext.TraceIdentifier,
+                ["method"] = httpContext.Request.Method
             }
         };
 
@@ -59,3 +61,6 @@ public class GlobalExceptionHandler : IExceptionHandler
         return true;
     }
 }
+
+
+// problemDetails.Extensions["correlationId"] = Activity.Current?.Id ?? httpContext.TraceIdentifier; // for microservices.
