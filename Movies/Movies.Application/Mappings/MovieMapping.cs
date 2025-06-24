@@ -1,15 +1,15 @@
 using System.Text.RegularExpressions;
-using Movies.Application.Models.Aggregates.MovieAggregates;
 using Movies.Application.Models.Commands.MovieCommands;
+using Movies.Application.Models.DTOs.Movies;
 using Movies.Application.Models.Entities;
 
 namespace Movies.Application.Mappings;
 
 internal static class MovieMapping
 {
-    internal static MovieAggregate ToMovieAggregate(this Movie movie)
+    internal static MovieDto ToMovieDto(this Movie movie)
     {
-        return new MovieAggregate
+        return new MovieDto
         {
             Id = movie.Id,
             Title = movie.Title,
@@ -18,14 +18,9 @@ internal static class MovieMapping
         };
     }
 
-    internal static MovieAggregateList ToMovieAggregateList(this IEnumerable<Movie> movies)
+    internal static IEnumerable<MovieDto> ToMovieDtoList(this IEnumerable<Movie> movies)
     {
-       var result = movies.Select(m => m.ToMovieAggregate());
-
-       return new MovieAggregateList
-       {
-           Movies = result
-       };
+       return movies.Select(m => m.ToMovieDto());
     }
 
     internal static Movie ToMovie(this CreateMovieCommand movieCommand)

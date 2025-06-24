@@ -1,7 +1,7 @@
 ﻿using FluentValidation;
 using Movies.Application.Mappings;
-using Movies.Application.Models.Aggregates.MovieAggregates;
 using Movies.Application.Models.Commands.MovieCommands;
+using Movies.Application.Models.DTOs.Movies;
 using Movies.Application.Models.Queries.MovieQueries;
 using Movies.Application.Repositories;
 using Movies.Application.Repositories.MovieRepository.Command;
@@ -16,7 +16,7 @@ internal sealed class MovieService(
     IValidator<GetMovieByIdQuery> getMovieByIdValidator,
     IValidator<CreateMovieCommand> createMovieValidator) : IMovieService
 {
-    public async Task<MovieAggregate?> GetByIdAsync(GetMovieByIdQuery query,
+    public async Task<MovieDto?> GetByIdAsync(GetMovieByIdQuery query,
         CancellationToken cancellationToken = default)
     {
         await getMovieByIdValidator.ValidateAndThrowAsync(query, cancellationToken: cancellationToken);

@@ -17,14 +17,14 @@ public class MoviesController(IMovieService movieService) : ControllerBase
     public async Task<IActionResult> Get([FromRoute] Guid id, CancellationToken cancellationToken)
     {
         var query = new GetMovieByIdQuery { Id = id };
-        var movieAggregate = await movieService.GetByIdAsync(query, cancellationToken);
+        var movieDto = await movieService.GetByIdAsync(query, cancellationToken);
 
-        if (movieAggregate is null)
+        if (movieDto is null)
         {
             return NotFound();
         }
 
-        var response = movieAggregate.ToMovieResponse();
+        var response = movieDto.ToMovieResponse();
         return Ok(response);
     }
 

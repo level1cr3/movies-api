@@ -1,6 +1,6 @@
-﻿namespace Movies.Application.Models.Aggregates.MovieAggregates;
+﻿namespace Movies.Application.Models.DTOs.Movies;
 
-public class MovieAggregate
+public class MovieDto
 {
     public required Guid Id { get; init; }
 

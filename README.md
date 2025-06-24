@@ -32,11 +32,11 @@ my movies api for learning rest api development in asp.net core using web api
 
 
 | From → To                              | Where?                       | Tools                         |
-| -------------------------------------- | ---------------------------- | ----------------------------- |
+|----------------------------------------| ---------------------------- | ----------------------------- |
 | `Contract Request` → `CommandModel`    | Controller or a Mapper class | Manual / Mapster / AutoMapper |
 | `CommandModel` → `Entity`              | Service or Domain            | Manual or Factory method      |
-| `Entity` → `AggregateModel`            | Service layer                | Manual or projection          |
-| `AggregateModel` → `Contract Response` | Controller or Mapper         | Manual / Mapster              |
+| `Entity` → `DtoModel`                  | Service layer                | Manual or projection          |
+| `DtoModel` → `Contract Response`               | Controller or Mapper         | Manual / Mapster              |
 
 
 > Make Contracts, Query and Command Model of Record type.
