@@ -36,7 +36,7 @@ public static class DependencyInjection
     
     private static void AddServices(IServiceCollection services)
     {
-        services.AddScoped<IMovieService,MovieService>();
+        // services.AddScoped<IMovieService,MovieService>();
     }
 
     
