@@ -3,7 +3,7 @@ using Movies.Application.DTOs.Movies;
 
 namespace Movies.Application.Validators.MovieValidators;
 
-internal class CreateMovieDtoValidator : AbstractValidator<CreateMovieDto>
+public class CreateMovieDtoValidator : AbstractValidator<CreateMovieDto>
 {
     public CreateMovieDtoValidator()
     {

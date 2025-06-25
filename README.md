@@ -40,4 +40,5 @@ my movies api for learning rest api development in asp.net core using web api
 
 > we will only go with manual mapping only
 
-> in application layer i have services interface, DTOs and dependency injection only public rest are internal 
+> in application I have made many things internal which i don't think should be accessed directly from api.
+> like applicationDbContext, repository, entity and configurations for entity and so on..  
