@@ -23,14 +23,14 @@ internal static class MovieMapping
        return movies.Select(m => m.ToMovieDto());
     }
 
-    internal static Movie ToMovie(this CreateMovieCommand movieCommand)
+    internal static Movie ToMovie(this CreateMovieDto movieDto)
     {
         return new Movie
         {
             Id = Guid.CreateVersion7(),
-            Slug = GetSlug(movieCommand.Title,movieCommand.YearOfRelease),
-            Title = movieCommand.Title,
-            YearOfRelease = movieCommand.YearOfRelease
+            Slug = GetSlug(movieDto.Title,movieDto.YearOfRelease),
+            Title = movieDto.Title,
+            YearOfRelease = movieDto.YearOfRelease
         };
     }
 

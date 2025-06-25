@@ -18,9 +18,9 @@ public static class MovieMapping
         };
     }
 
-    public static CreateMovieCommand ToCreateMovieCommand(this CreateMovieRequest request)
+    public static CreateMovieDto ToCreateMovieCommand(this CreateMovieRequest request)
     {
-        return new CreateMovieCommand
+        return new CreateMovieDto
         {
             Title = request.Title,
             YearOfRelease = request.YearOfRelease

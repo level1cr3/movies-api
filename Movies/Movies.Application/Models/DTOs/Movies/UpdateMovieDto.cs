@@ -1,6 +1,6 @@
 namespace Movies.Application.Models.Commands.MovieCommands;
 
-public record UpdateMovieCommand
+public record UpdateMovieDto
 {
     public Guid Id { get; init; }
 

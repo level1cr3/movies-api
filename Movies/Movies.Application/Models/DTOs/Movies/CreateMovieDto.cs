@@ -1,6 +1,6 @@
 namespace Movies.Application.Models.Commands.MovieCommands;
 
-public record CreateMovieCommand
+public record CreateMovieDto
 {
     public string Title { get; init; } = string.Empty;
 

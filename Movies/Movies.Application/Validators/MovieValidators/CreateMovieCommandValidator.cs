@@ -3,7 +3,7 @@ using Movies.Application.Models.Commands.MovieCommands;
 
 namespace Movies.Application.Validators.MovieValidators;
 
-public class CreateMovieCommandValidator : AbstractValidator<CreateMovieCommand>
+public class CreateMovieCommandValidator : AbstractValidator<CreateMovieDto>
 {
     public CreateMovieCommandValidator()
     {

@@ -1,7 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Movies.Api.Mappings;
 using Movies.Api.Routes;
-using Movies.Application.Models.Queries.MovieQueries;
 using Movies.Application.Services.MovieService;
 using Movies.Contracts.Requests.MovieRequest;
 using Movies.Contracts.Responses.MovieResponse;
@@ -16,8 +15,7 @@ public class MoviesController(IMovieService movieService) : ControllerBase
     [ProducesResponseType<MovieResponse>(StatusCodes.Status200OK)]
     public async Task<IActionResult> Get([FromRoute] Guid id, CancellationToken cancellationToken)
     {
-        var query = new GetMovieByIdQuery { Id = id };
-        var movieDto = await movieService.GetByIdAsync(query, cancellationToken);
+        var movieDto = await movieService.GetByIdAsync(id, cancellationToken);
 
         if (movieDto is null)
         {

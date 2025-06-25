@@ -2,10 +2,11 @@
 using Movies.Application.Data;
 using Movies.Application.Mappings;
 using Movies.Application.Models.DTOs.Movies;
+using Movies.Application.Models.Entities;
 
-namespace Movies.Application.Repositories.MovieRepository.Query;
+namespace Movies.Application.Repositories.Movies;
 
-internal sealed class MovieQueryRepository(ApplicationDbContext db) : IMovieQueryRepository
+internal class MovieRepository(ApplicationDbContext db) : IMovieRepository
 {
     public async Task<MovieDto?> GetByIdAsync(Guid id, CancellationToken cancellationToken = default)
     {
@@ -23,17 +24,22 @@ internal sealed class MovieQueryRepository(ApplicationDbContext db) : IMovieQuer
 
     public async Task<IEnumerable<MovieDto>> GetAllAsync(CancellationToken cancellationToken = default)
     {
-       var movies = await db.Movies.ToListAsync(cancellationToken);
-       return movies.ToMovieDtoList();
-    }
-    
-    public async Task<bool> ExistsByIdAsync(Guid id, CancellationToken cancellationToken = default)
-    {
-        return await db.Movies.AnyAsync(m => m.Id == id, cancellationToken);
+        var movies = await db.Movies.ToListAsync(cancellationToken);
+        return movies.ToMovieDtoList();
     }
 
-    public async Task<bool> ExistsBySlugAsync(string slug, CancellationToken cancellationToken = default)
+    public void Create(Movie movie)
     {
-        return await db.Movies.AnyAsync(m => m.Slug == slug, cancellationToken);
+        db.Movies.Add(movie);
+    }
+
+    public void Update(Movie movie)
+    {
+        throw new NotImplementedException();
+    }
+
+    public void Delete(Guid id, CancellationToken cancellationToken = default)
+    {
+        throw new NotImplementedException();
     }
 }

@@ -2,34 +2,28 @@
 using Movies.Application.Mappings;
 using Movies.Application.Models.Commands.MovieCommands;
 using Movies.Application.Models.DTOs.Movies;
-using Movies.Application.Models.Queries.MovieQueries;
 using Movies.Application.Repositories;
-using Movies.Application.Repositories.MovieRepository.Command;
-using Movies.Application.Repositories.MovieRepository.Query;
+using Movies.Application.Repositories.Movies;
 
 namespace Movies.Application.Services.MovieService;
 
 internal sealed class MovieService(
-    IMovieQueryRepository queryRepository,
-    IMovieCommandRepository commandRepository,
+    IMovieRepository movieRepository,
     IUnitOfWork unitOfWork,
-    IValidator<GetMovieByIdQuery> getMovieByIdValidator,
-    IValidator<CreateMovieCommand> createMovieValidator) : IMovieService
+    IValidator<CreateMovieDto> createMovieValidator) : IMovieService
 {
-    public async Task<MovieDto?> GetByIdAsync(GetMovieByIdQuery query,
+    public async Task<MovieDto?> GetByIdAsync(Guid id,
         CancellationToken cancellationToken = default)
     {
-        await getMovieByIdValidator.ValidateAndThrowAsync(query, cancellationToken: cancellationToken);
-
-        return await queryRepository.GetByIdAsync(query.Id, cancellationToken);
+        return await movieRepository.GetByIdAsync(id, cancellationToken);
     }
 
-    public async Task<Guid?> CreateAsync(CreateMovieCommand command, CancellationToken cancellationToken = default)
+    public async Task<Guid?> CreateAsync(CreateMovieDto dto, CancellationToken cancellationToken = default)
     {
-        await createMovieValidator.ValidateAndThrowAsync(command, cancellationToken);
+        await createMovieValidator.ValidateAndThrowAsync(dto, cancellationToken);
         
-        var movie = command.ToMovie();
-        commandRepository.Create(movie);
+        var movie = dto.ToMovie();
+        movieRepository.Create(movie);
         var result = await unitOfWork.SaveChangesAsync(cancellationToken);
         return result > 0 ? movie.Id : null;
     }
