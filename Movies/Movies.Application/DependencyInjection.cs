@@ -5,6 +5,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Movies.Application.Data;
 using Movies.Application.Data.Repositories;
 using Movies.Application.Data.Repositories.Movies;
+using Movies.Application.Services.Movies;
 
 namespace Movies.Application;
 
@@ -34,6 +35,6 @@ public static class DependencyInjection
 
     private static void AddServices(IServiceCollection services)
     {
-        // services.AddScoped<IMovieService,MovieService>();
+        services.AddScoped<IMovieService,MovieService>();
     }
 }
