@@ -1,7 +1,6 @@
-﻿using Movies.Application.Models.Commands.MovieCommands;
-using Movies.Application.Models.DTOs.Movies;
+﻿using Movies.Application.DTOs.Movies;
 
-namespace Movies.Application.Services.MovieService;
+namespace Movies.Application.Services.Movies;
 
 public interface IMovieService
 {

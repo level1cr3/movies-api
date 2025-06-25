@@ -1,4 +1,4 @@
-﻿namespace Movies.Application.Repositories;
+﻿namespace Movies.Application.Data.Repositories;
 
 internal interface IUnitOfWork
 {

@@ -1,16 +1,12 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿namespace Movies.Application.DTOs.Movies;
 
-namespace Movies.Application.Models.Entities;
-
-public class Movie
+public class MovieDto
 {
     public required Guid Id { get; init; }
 
-    [MaxLength(200)] 
     public required string Title { get; init; }
 
     public required int YearOfRelease { get; init; }
-
-    [MaxLength(250)] 
+    
     public required string Slug { get; init; }
 }

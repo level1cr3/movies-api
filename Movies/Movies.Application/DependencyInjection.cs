@@ -3,8 +3,8 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Movies.Application.Data;
-using Movies.Application.Repositories;
-using Movies.Application.Repositories.Movies;
+using Movies.Application.Data.Repositories;
+using Movies.Application.Data.Repositories.Movies;
 
 namespace Movies.Application;
 

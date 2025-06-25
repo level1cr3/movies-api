@@ -1,11 +1,11 @@
 ﻿using FluentValidation;
-using Movies.Application.Models.Commands.MovieCommands;
+using Movies.Application.DTOs.Movies;
 
 namespace Movies.Application.Validators.MovieValidators;
 
-public class CreateMovieCommandValidator : AbstractValidator<CreateMovieDto>
+internal class CreateMovieDtoValidator : AbstractValidator<CreateMovieDto>
 {
-    public CreateMovieCommandValidator()
+    public CreateMovieDtoValidator()
     {
         RuleFor(c => c.Title).NotEmpty().MaximumLength(200);
 

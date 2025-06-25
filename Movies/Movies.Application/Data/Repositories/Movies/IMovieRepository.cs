@@ -1,7 +1,7 @@
-﻿using Movies.Application.Models.DTOs.Movies;
-using Movies.Application.Models.Entities;
+﻿using Movies.Application.Data.Entities;
+using Movies.Application.DTOs.Movies;
 
-namespace Movies.Application.Repositories.Movies;
+namespace Movies.Application.Data.Repositories.Movies;
 
 internal interface IMovieRepository
 {

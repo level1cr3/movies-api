@@ -1,6 +1,4 @@
-﻿using Movies.Application.Data;
-
-namespace Movies.Application.Repositories;
+﻿namespace Movies.Application.Data.Repositories;
 
 internal sealed class UnitOfWork(ApplicationDbContext db) : IUnitOfWork
 {

@@ -1,4 +1,4 @@
-namespace Movies.Application.Models.Commands.MovieCommands;
+namespace Movies.Application.DTOs.Movies;
 
 public record CreateMovieDto
 {

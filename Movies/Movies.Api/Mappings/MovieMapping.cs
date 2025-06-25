@@ -1,5 +1,4 @@
-﻿using Movies.Application.Models.Commands.MovieCommands;
-using Movies.Application.Models.DTOs.Movies;
+﻿using Movies.Application.DTOs.Movies;
 using Movies.Contracts.Requests.MovieRequest;
 using Movies.Contracts.Responses.MovieResponse;
 
@@ -18,7 +17,7 @@ public static class MovieMapping
         };
     }
 
-    public static CreateMovieDto ToCreateMovieCommand(this CreateMovieRequest request)
+    public static CreateMovieDto ToCreateMovieDto(this CreateMovieRequest request)
     {
         return new CreateMovieDto
         {

@@ -1,7 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Movies.Api.Mappings;
 using Movies.Api.Routes;
-using Movies.Application.Services.MovieService;
+using Movies.Application.Services.Movies;
 using Movies.Contracts.Requests.MovieRequest;
 using Movies.Contracts.Responses.MovieResponse;
 
@@ -32,7 +32,7 @@ public class MoviesController(IMovieService movieService) : ControllerBase
     [ProducesResponseType(StatusCodes.Status201Created)]
     public async Task<IActionResult> Create([FromBody] CreateMovieRequest request, CancellationToken cancellationToken)
     {
-        var command = request.ToCreateMovieCommand();
+        var command = request.ToCreateMovieDto();
         var movieId = await movieService.CreateAsync(command, cancellationToken);
 
         if (movieId is null)

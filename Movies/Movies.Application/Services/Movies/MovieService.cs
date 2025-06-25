@@ -1,16 +1,15 @@
 ﻿using FluentValidation;
+using Movies.Application.Data.Repositories;
+using Movies.Application.Data.Repositories.Movies;
+using Movies.Application.DTOs.Movies;
 using Movies.Application.Mappings;
-using Movies.Application.Models.Commands.MovieCommands;
-using Movies.Application.Models.DTOs.Movies;
-using Movies.Application.Repositories;
-using Movies.Application.Repositories.Movies;
 
-namespace Movies.Application.Services.MovieService;
+namespace Movies.Application.Services.Movies;
 
 internal sealed class MovieService(
     IMovieRepository movieRepository,
     IUnitOfWork unitOfWork,
-    IValidator<CreateMovieDto> createMovieValidator) : IMovieService
+    IValidator<CreateMovieDto> createMovieDtoValidator) : IMovieService
 {
     public async Task<MovieDto?> GetByIdAsync(Guid id,
         CancellationToken cancellationToken = default)
@@ -20,7 +19,7 @@ internal sealed class MovieService(
 
     public async Task<Guid?> CreateAsync(CreateMovieDto dto, CancellationToken cancellationToken = default)
     {
-        await createMovieValidator.ValidateAndThrowAsync(dto, cancellationToken);
+        await createMovieDtoValidator.ValidateAndThrowAsync(dto, cancellationToken);
         
         var movie = dto.ToMovie();
         movieRepository.Create(movie);

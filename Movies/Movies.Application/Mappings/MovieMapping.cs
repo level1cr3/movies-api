@@ -1,7 +1,6 @@
 using System.Text.RegularExpressions;
-using Movies.Application.Models.Commands.MovieCommands;
-using Movies.Application.Models.DTOs.Movies;
-using Movies.Application.Models.Entities;
+using Movies.Application.Data.Entities;
+using Movies.Application.DTOs.Movies;
 
 namespace Movies.Application.Mappings;
 

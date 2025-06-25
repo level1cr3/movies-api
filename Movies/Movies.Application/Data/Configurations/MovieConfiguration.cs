@@ -1,10 +1,10 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
-using Movies.Application.Models.Entities;
+using Movies.Application.Data.Entities;
 
 namespace Movies.Application.Data.Configurations;
 
-public sealed class MovieConfiguration : IEntityTypeConfiguration<Movie>
+internal sealed class MovieConfiguration : IEntityTypeConfiguration<Movie>
 {
     public void Configure(EntityTypeBuilder<Movie> builder)
     {

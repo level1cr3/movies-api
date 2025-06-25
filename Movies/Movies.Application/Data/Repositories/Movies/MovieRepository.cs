@@ -1,10 +1,9 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using Movies.Application.Data;
+using Movies.Application.Data.Entities;
+using Movies.Application.DTOs.Movies;
 using Movies.Application.Mappings;
-using Movies.Application.Models.DTOs.Movies;
-using Movies.Application.Models.Entities;
 
-namespace Movies.Application.Repositories.Movies;
+namespace Movies.Application.Data.Repositories.Movies;
 
 internal class MovieRepository(ApplicationDbContext db) : IMovieRepository
 {
