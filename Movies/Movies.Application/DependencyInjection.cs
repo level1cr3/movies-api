@@ -1,8 +1,10 @@
 ﻿using FluentValidation;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Movies.Application.Data;
+using Movies.Application.Data.Entities;
 using Movies.Application.Data.Repositories;
 using Movies.Application.Data.Repositories.Movies;
 using Movies.Application.Services.Movies;
@@ -31,6 +33,10 @@ public static class DependencyInjection
 
         services.AddScoped<IUnitOfWork, UnitOfWork>();
         services.AddScoped<IMovieRepository, MovieRepository>();
+
+        services.AddIdentity<ApplicationUser, ApplicationRole>()
+            .AddEntityFrameworkStores<ApplicationDbContext>()
+            .AddDefaultTokenProviders();
     }
 
     private static void AddServices(IServiceCollection services)
