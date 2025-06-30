@@ -16,6 +16,8 @@ builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
 builder.Host.UseSerilog((context, configuration) => 
     configuration.ReadFrom.Configuration(context.Configuration));
 
+// builder.Services.Configure<>()
+
 var app = builder.Build();
 
 app.UseExceptionHandler();

@@ -8,6 +8,7 @@ using Movies.Application.Data.Entities;
 using Movies.Application.Data.Repositories;
 using Movies.Application.Data.Repositories.Movies;
 using Movies.Application.Services.Movies;
+using Movies.Application.Email;
 
 namespace Movies.Application;
 
@@ -16,12 +17,14 @@ public static class DependencyInjection
     public static IServiceCollection AddApplication(this IServiceCollection services, IConfiguration configuration)
     {
         AddPersistence(services, configuration);
-        AddServices(services);
+        AddAuthentication(services);
+        AddEmailConfiguration(services, configuration);
+        AddServices(services, configuration);
 
         services.AddValidatorsFromAssembly(typeof(IApplicationAssemblyMarker).Assembly);
-
         return services;
     }
+
 
     private static void AddPersistence(IServiceCollection services, IConfiguration configuration)
     {
@@ -33,14 +36,32 @@ public static class DependencyInjection
 
         services.AddScoped<IUnitOfWork, UnitOfWork>();
         services.AddScoped<IMovieRepository, MovieRepository>();
-
+    }
+    
+    private static void AddAuthentication(IServiceCollection services)
+    {
         services.AddIdentity<ApplicationUser, ApplicationRole>()
             .AddEntityFrameworkStores<ApplicationDbContext>()
             .AddDefaultTokenProviders();
     }
-
-    private static void AddServices(IServiceCollection services)
+    
+    private static void AddEmailConfiguration(IServiceCollection services, IConfiguration configuration)
+    {
+        services.Configure<EmailSettings>(configuration.GetSection("EmailSettings"));
+        services.AddScoped<IEmailService, EmailService>();
+    }
+    
+    private static void AddServices(IServiceCollection services, IConfiguration configuration)
     {
         services.AddScoped<IMovieService,MovieService>();
     }
+    
+
+    
+    
+    
+    
+    
+    
+    
 }
