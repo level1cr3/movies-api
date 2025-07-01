@@ -21,4 +21,8 @@
       <ProjectReference Include="..\Movies.Contracts\Movies.Contracts.csproj" />
     </ItemGroup>
 
+    <ItemGroup>
+      <Folder Include="AppErrorLogs\" />
+    </ItemGroup>
+
 </Project>
