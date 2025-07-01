@@ -2,12 +2,13 @@
 using MailKit.Security;
 using Microsoft.Extensions.Options;
 using MimeKit;
+using Movies.Application.Settings;
 
 namespace Movies.Application.Email;
 
-public class EmailService(IOptions<EmailSettings> emailSettings) : IEmailService
+internal class EmailService(IOptions<EmailSettings> options) : IEmailService
 {
-    private readonly EmailSettings _emailSettings = emailSettings.Value;
+    private readonly EmailSettings _emailSettings = options.Value;
 
     public async Task SendAsync(string recipient, string subject, string htmlBody)
     {

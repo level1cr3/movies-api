@@ -1,6 +1,6 @@
-﻿namespace Movies.Application.Email;
+﻿namespace Movies.Application.Settings;
 
-public class EmailSettings
+internal record EmailSettings
 {
     
     public required string From { get; init; }

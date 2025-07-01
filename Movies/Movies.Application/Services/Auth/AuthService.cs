@@ -1,15 +1,23 @@
 ﻿using FluentValidation;
 using FluentValidation.Results;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.Extensions.Options;
 using Movies.Application.Constants;
 using Movies.Application.Data.Entities;
 using Movies.Application.DTOs.Auth;
 using Movies.Application.Email;
+using Movies.Application.Settings;
 
 namespace Movies.Application.Services.Auth;
 
-internal class AuthService(UserManager<ApplicationUser> userManager, IEmailService emailService)
+internal class AuthService(
+    UserManager<ApplicationUser> userManager,
+    IEmailService emailService,
+    IOptions<FrontendSettings> optionsFrontend)
 {
+
+    private readonly FrontendSettings _frontendSettings = optionsFrontend.Value;
+    
     public async Task<bool> Register(RegisterDto register)
     {
         // validate register Dto using fluent validation.
@@ -45,7 +53,7 @@ internal class AuthService(UserManager<ApplicationUser> userManager, IEmailServi
         
         // send confirmation email.
         var token = await userManager.GenerateEmailConfirmationTokenAsync(user);
-        var callbackUrl = $"";
+        var callbackUrl = $"{_frontendSettings.BaseUrl.TrimEnd('/')}{_frontendSettings.EmailConfirmationPath}?userId={Uri.EscapeDataString(user.Id.ToString())}&token={Uri.EscapeDataString(token)}";
 
         await emailService.SendAsync(user.Email, "Verify your email", 
             $"""Please verify your account by clicking : <a href="{callbackUrl}" target="_blank">here</a>""");

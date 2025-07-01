@@ -9,6 +9,7 @@ using Movies.Application.Data.Repositories;
 using Movies.Application.Data.Repositories.Movies;
 using Movies.Application.Services.Movies;
 using Movies.Application.Email;
+using Movies.Application.Settings;
 
 namespace Movies.Application;
 
@@ -21,6 +22,7 @@ public static class DependencyInjection
         AddEmailConfiguration(services, configuration);
         AddServices(services, configuration);
 
+        services.Configure<FrontendSettings>(configuration.GetSection("Frontend"));
         services.AddValidatorsFromAssembly(typeof(IApplicationAssemblyMarker).Assembly);
         return services;
     }
@@ -47,7 +49,7 @@ public static class DependencyInjection
     
     private static void AddEmailConfiguration(IServiceCollection services, IConfiguration configuration)
     {
-        services.Configure<EmailSettings>(configuration.GetSection("EmailSettings"));
+        services.Configure<EmailSettings>(configuration.GetSection("Email"));
         services.AddScoped<IEmailService, EmailService>();
     }
     
