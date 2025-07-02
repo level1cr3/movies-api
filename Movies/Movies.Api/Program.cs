@@ -1,5 +1,6 @@
 using Movies.Api.Middleware;
 using Movies.Application;
+using Movies.Application.Data.Seeder;
 using Scalar.AspNetCore;
 using Serilog;
 
@@ -19,6 +20,23 @@ builder.Host.UseSerilog((context, configuration) =>
 // builder.Services.Configure<>()
 
 var app = builder.Build();
+
+using var scope = app.Services.CreateScope(); 
+var seeder = scope.ServiceProvider.GetRequiredService<IDataSeeder>();
+await seeder.SeedAsync();
+
+// var seeder = app.Services.GetRequiredService<IDataSeeder>();
+// await seeder.SeedAsync(); // this is bad and can cause issue if DataSeeder depends on scoped services. use it only for singleton
+
+/*
+ CreateScope() ensures that any scoped dependencies used inside your IDataSeeder 
+ (e.g. UserManager, RoleManager, DbContext, etc.) are resolved properly within a scoped lifetime.
+
+ Without CreateScope(), calling app.Services.GetRequiredService<>() resolves services from the root container, 
+ which is not safe for scoped services.
+ 
+ */
+
 
 app.UseExceptionHandler();
 app.UseSerilogRequestLogging();

@@ -7,6 +7,7 @@ using Movies.Application.Data;
 using Movies.Application.Data.Entities;
 using Movies.Application.Data.Repositories;
 using Movies.Application.Data.Repositories.Movies;
+using Movies.Application.Data.Seeder;
 using Movies.Application.Services.Movies;
 using Movies.Application.Email;
 using Movies.Application.Services.Auth;
@@ -37,6 +38,8 @@ public static class DependencyInjection
         services.AddDbContext<ApplicationDbContext>(options =>
             options.UseNpgsql(dbConnection).UseSnakeCaseNamingConvention());
 
+        services.Configure<AdminInfo>(configuration.GetSection("DefaultAdmin"));
+        services.AddScoped<IDataSeeder, DataSeeder>();
         services.AddScoped<IUnitOfWork, UnitOfWork>();
         services.AddScoped<IMovieRepository, MovieRepository>();
     }
