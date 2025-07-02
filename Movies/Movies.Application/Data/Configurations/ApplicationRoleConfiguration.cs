@@ -18,14 +18,14 @@ internal class ApplicationRoleConfiguration : IEntityTypeConfiguration<Applicati
                 Id = new Guid("0197c5c8-8105-7c77-805a-4fe55026f743"), // manually inserting keep it same across. because we don't want to change it in case it was bound with user.
                 Name = Role.Admin,
                 NormalizedName = Role.Admin.ToUpper(),
-                ConcurrencyStamp = ""
+                ConcurrencyStamp = "34b57f91-badf-4c9f-ae96-5122a04efa9a"
             },
             new ApplicationRole
             {
                 Id = new Guid("0197c5c8-8112-732a-afc4-bf3764d966da"),
                 Name = Role.User,
                 NormalizedName = Role.User.ToUpper(),
-                ConcurrencyStamp = ""
+                ConcurrencyStamp = "c9cc9ee2-620f-4e4f-adc5-bcddbfeb99f1"
             }
         );
         
