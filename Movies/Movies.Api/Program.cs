@@ -1,4 +1,5 @@
 using Movies.Api.Middleware;
+using Movies.Api.OpenApi.Transformers;
 using Movies.Application;
 using Movies.Application.Data.Seeder;
 using Scalar.AspNetCore;
@@ -6,7 +7,11 @@ using Serilog;
 
 var builder = WebApplication.CreateBuilder(args);
 
-builder.Services.AddOpenApi();
+builder.Services.AddOpenApi(options =>
+{
+    options.AddDocumentTransformer<DefaultErrorResponsesTransformer>();
+});
+
 builder.Services.AddControllers();
 
 builder.Services.AddApplication(builder.Configuration);
@@ -50,6 +55,7 @@ if (app.Environment.IsDevelopment())
     {
         options.Title = "Movies API";
         options.OpenApiRoutePattern = "/api/document.json";
+        
     });
 }
 
