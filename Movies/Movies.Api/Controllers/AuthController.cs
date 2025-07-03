@@ -19,7 +19,13 @@ public class AuthController(IAuthService authService) : ControllerBase
         await authService.RegisterAsync(registerDto);
         return Created();
     }
-    
-    
+
+    [HttpPost(AuthEndpoints.ConfirmEmail)]
+    public async Task<IActionResult> ConfirmEmail([FromBody] ConfirmEmailRequest request)
+    {
+        throw new NotImplementedException();
+    }
+
+
 
 }

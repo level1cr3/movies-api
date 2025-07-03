@@ -5,6 +5,8 @@ public static class AuthEndpoints
     private const string Base = $"{ApiEndpointConstants.ApiBase}/auth";
 
     public const string Register = $"{Base}/register";
+
+    public const string ConfirmEmail = $"{Base}/confirm-email";
 }
 
 

@@ -12,22 +12,26 @@ using Movies.Application.Settings;
 
 namespace Movies.Application.Services.Auth;
 
-internal class AuthService(ApplicationDbContext db,
+internal class AuthService(
+    ApplicationDbContext db,
     UserManager<ApplicationUser> userManager,
     IEmailService emailService,
     IOptions<FrontendSettings> optionsFrontend,
     IValidator<RegisterDto> registerValidator) : IAuthService
 {
     private readonly FrontendSettings _frontendSettings = optionsFrontend.Value;
-    
+
     public async Task RegisterAsync(RegisterDto register)
     {
+
+        var validationResult = await registerValidator.ValidateAsync(register);
+
+        await registerValidator.ValidateAndThrowAsync(register);
+        
         await using var transaction = await db.Database.BeginTransactionAsync();
 
         try
         {
-            await registerValidator.ValidateAndThrowAsync(register);
-
             var user = new ApplicationUser
             {
                 FirstName = register.FirstName,
@@ -40,11 +44,12 @@ internal class AuthService(ApplicationDbContext db,
             ThrowIfFailed(result);
             result = await userManager.AddToRoleAsync(user, Role.User);
             ThrowIfFailed(result);
-        
-            var token = await userManager.GenerateEmailConfirmationTokenAsync(user);
-            var callbackUrl = $"{_frontendSettings.BaseUrl.TrimEnd('/')}{_frontendSettings.EmailConfirmationPath}?userId={Uri.EscapeDataString(user.Id.ToString())}&token={Uri.EscapeDataString(token)}";
 
-            await emailService.SendAsync(user.Email, "Verify your email", 
+            var token = await userManager.GenerateEmailConfirmationTokenAsync(user);
+            var callbackUrl =
+                $"{_frontendSettings.BaseUrl.TrimEnd('/')}{_frontendSettings.EmailConfirmationPath}?userId={Uri.EscapeDataString(user.Id.ToString())}&token={Uri.EscapeDataString(token)}";
+
+            await emailService.SendAsync(user.Email, "Verify your email",
                 $"""Please verify your account by clicking : <a href="{callbackUrl}" target="_blank">here</a>""");
 
             await transaction.CommitAsync();
@@ -54,20 +59,40 @@ internal class AuthService(ApplicationDbContext db,
             await transaction.RollbackAsync();
             throw;
         }
-        
     }
+
+    public async Task ConfirmEmailAsync(string userId, string token)
+    {
+        var user = await userManager.FindByIdAsync(userId);
+
+        if (user is null)
+        {
+            return;
+        }
+
+        if (user.EmailConfirmed)
+        {
+            return;
+            // already confirmed.
+        }
+
+        var result = await userManager.ConfirmEmailAsync(user, token);
+
+        // return result.Succeeded;
+
+        return;
+    }
+
 
     private static void ThrowIfFailed(IdentityResult result)
     {
         if (result.Succeeded) return;
-        
+
         var validationFailures = result.Errors
             .Select(error => new ValidationFailure(error.Code, error.Description));
 
         throw new ValidationException(validationFailures);
     }
-    
-    
 }
 
 
@@ -82,7 +107,7 @@ internal class AuthService(ApplicationDbContext db,
     Identity methods like:
 
     UserManager.CreateAsync()
-    UserManager.AddToRoleAsync()    
+    UserManager.AddToRoleAsync()
     RoleManager.CreateAsync()
 
     These internally save changes (they call SaveChangesAsync() under the hood), so:

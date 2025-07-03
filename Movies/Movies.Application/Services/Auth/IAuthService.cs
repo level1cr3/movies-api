@@ -5,4 +5,7 @@ namespace Movies.Application.Services.Auth;
 public interface IAuthService
 {
     Task RegisterAsync(RegisterDto register);
+    
+    Task ConfirmEmailAsync(string userId, string token);
+    
 }
