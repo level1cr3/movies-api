@@ -1,4 +1,4 @@
-﻿namespace Movies.Application.Constants;
+﻿namespace Movies.Application.Features.Auth.Constants;
 
 public static class Role
 {

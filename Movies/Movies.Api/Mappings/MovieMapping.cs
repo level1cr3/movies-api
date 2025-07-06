@@ -1,4 +1,4 @@
-﻿using Movies.Application.DTOs.Movies;
+﻿using Movies.Application.Features.Movie.DTOs;
 using Movies.Contracts.Requests.MovieRequest;
 using Movies.Contracts.Responses.MovieResponse;
 

@@ -1,7 +1,7 @@
 ﻿using FluentValidation;
 using Movies.Application.DTOs.Auth;
 
-namespace Movies.Application.Validators.Auth;
+namespace Movies.Application.Features.Auth.Validators;
 
 public class RegisterDtoValidator : AbstractValidator<RegisterDto>
 {

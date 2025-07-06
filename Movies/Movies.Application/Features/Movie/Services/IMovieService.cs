@@ -1,6 +1,6 @@
-﻿using Movies.Application.DTOs.Movies;
+﻿using Movies.Application.Features.Movie.DTOs;
 
-namespace Movies.Application.Services.Movies;
+namespace Movies.Application.Features.Movie.Services;
 
 public interface IMovieService
 {

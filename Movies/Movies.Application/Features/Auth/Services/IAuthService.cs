@@ -1,6 +1,6 @@
 ﻿using Movies.Application.DTOs.Auth;
 
-namespace Movies.Application.Services.Auth;
+namespace Movies.Application.Features.Auth.Services;
 
 public interface IAuthService
 {

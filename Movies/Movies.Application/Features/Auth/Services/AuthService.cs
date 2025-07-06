@@ -1,16 +1,15 @@
 ﻿using FluentValidation;
 using FluentValidation.Results;
 using Microsoft.AspNetCore.Identity;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
-using Movies.Application.Constants;
 using Movies.Application.Data;
 using Movies.Application.Data.Entities;
 using Movies.Application.DTOs.Auth;
 using Movies.Application.Email;
+using Movies.Application.Features.Auth.Constants;
 using Movies.Application.Settings;
 
-namespace Movies.Application.Services.Auth;
+namespace Movies.Application.Features.Auth.Services;
 
 internal class AuthService(
     ApplicationDbContext db,

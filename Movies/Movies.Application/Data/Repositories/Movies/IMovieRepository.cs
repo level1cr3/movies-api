@@ -1,5 +1,5 @@
 ﻿using Movies.Application.Data.Entities;
-using Movies.Application.DTOs.Movies;
+using Movies.Application.Features.Movie.DTOs;
 
 namespace Movies.Application.Data.Repositories.Movies;
 

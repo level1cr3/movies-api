@@ -1,7 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Movies.Api.Mappings;
 using Movies.Api.Routes;
-using Movies.Application.Services.Auth;
+using Movies.Application.Features.Auth.Services;
 using Movies.Contracts.Requests.Auth;
 
 namespace Movies.Api.Controllers;

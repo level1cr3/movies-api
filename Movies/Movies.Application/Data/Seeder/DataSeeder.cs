@@ -1,8 +1,8 @@
 ﻿using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
-using Movies.Application.Constants;
 using Movies.Application.Data.Entities;
+using Movies.Application.Features.Auth.Constants;
 
 namespace Movies.Application.Data.Seeder;
 

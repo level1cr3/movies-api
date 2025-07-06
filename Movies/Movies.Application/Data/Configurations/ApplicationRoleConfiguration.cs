@@ -1,6 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
-using Movies.Application.Constants;
 using Movies.Application.Data.Entities;
 using Movies.Application.Data.Helpers;
 

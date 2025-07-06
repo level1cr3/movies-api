@@ -1,7 +1,7 @@
 ﻿using FluentValidation;
-using Movies.Application.DTOs.Movies;
+using Movies.Application.Features.Movie.DTOs;
 
-namespace Movies.Application.Validators.MovieValidators;
+namespace Movies.Application.Features.Movie.Validators;
 
 public class CreateMovieDtoValidator : AbstractValidator<CreateMovieDto>
 {

@@ -1,12 +1,11 @@
 using System.Text.RegularExpressions;
-using Movies.Application.Data.Entities;
-using Movies.Application.DTOs.Movies;
+using Movies.Application.Features.Movie.DTOs;
 
-namespace Movies.Application.Mappings;
+namespace Movies.Application.Features.Movie.Mappings;
 
 internal static class MovieMapping
 {
-    internal static MovieDto ToMovieDto(this Movie movie)
+    internal static MovieDto ToMovieDto(this Data.Entities.Movie movie)
     {
         return new MovieDto
         {
@@ -17,14 +16,14 @@ internal static class MovieMapping
         };
     }
 
-    internal static IEnumerable<MovieDto> ToMovieDtoList(this IEnumerable<Movie> movies)
+    internal static IEnumerable<MovieDto> ToMovieDtoList(this IEnumerable<Data.Entities.Movie> movies)
     {
        return movies.Select(m => m.ToMovieDto());
     }
 
-    internal static Movie ToMovie(this CreateMovieDto movieDto)
+    internal static Data.Entities.Movie ToMovie(this CreateMovieDto movieDto)
     {
-        return new Movie
+        return new Data.Entities.Movie
         {
             Id = Guid.CreateVersion7(),
             Slug = GetSlug(movieDto.Title,movieDto.YearOfRelease),

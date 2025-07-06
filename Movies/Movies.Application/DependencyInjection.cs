@@ -8,9 +8,9 @@ using Movies.Application.Data.Entities;
 using Movies.Application.Data.Repositories;
 using Movies.Application.Data.Repositories.Movies;
 using Movies.Application.Data.Seeder;
-using Movies.Application.Services.Movies;
 using Movies.Application.Email;
-using Movies.Application.Services.Auth;
+using Movies.Application.Features.Auth.Services;
+using Movies.Application.Features.Movie.Services;
 using Movies.Application.Settings;
 
 namespace Movies.Application;

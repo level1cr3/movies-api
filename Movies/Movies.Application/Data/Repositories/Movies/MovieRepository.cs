@@ -1,7 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Movies.Application.Data.Entities;
-using Movies.Application.DTOs.Movies;
-using Movies.Application.Mappings;
+using Movies.Application.Features.Movie.DTOs;
+using Movies.Application.Features.Movie.Mappings;
 
 namespace Movies.Application.Data.Repositories.Movies;
 

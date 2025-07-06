@@ -1,7 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Movies.Api.Mappings;
 using Movies.Api.Routes;
-using Movies.Application.Services.Movies;
+using Movies.Application.Features.Movie.Services;
 using Movies.Contracts.Requests.MovieRequest;
 using Movies.Contracts.Responses.MovieResponse;
 

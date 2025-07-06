@@ -1,10 +1,10 @@
 ﻿using FluentValidation;
 using Movies.Application.Data.Repositories;
 using Movies.Application.Data.Repositories.Movies;
-using Movies.Application.DTOs.Movies;
-using Movies.Application.Mappings;
+using Movies.Application.Features.Movie.DTOs;
+using Movies.Application.Features.Movie.Mappings;
 
-namespace Movies.Application.Services.Movies;
+namespace Movies.Application.Features.Movie.Services;
 
 internal sealed class MovieService(
     IMovieRepository movieRepository,
