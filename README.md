@@ -65,3 +65,7 @@ Operation succeeded, but value is null vs.
 Operation failed.
 
 In most clean implementations of Result<T>, the absence of value is already implied by Result.Failure(...), so MovieDto (non-nullable) is sufficient.
+
+
+
+> will not use [ProducesResponseType] for 400 and 500 will centralize them using IOpenApiDocumentTransformer

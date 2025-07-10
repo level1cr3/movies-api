@@ -11,6 +11,8 @@ public record AppProblemDetails
     public required string Type { get; init; }
     
     public required string Instance { get; init; }
+    
+    public required string Method { get; init; }
 
     public required IReadOnlyList<ApiError> Errors  { get; init; } 
 }

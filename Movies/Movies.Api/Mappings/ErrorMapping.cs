@@ -14,6 +14,7 @@ public static class ErrorMapping
             Status = StatusCodes.Status400BadRequest,
             Type = "https://datatracker.ietf.org/doc/html/rfc9110#section-15.5.1",
             Instance = httpContext.Request.Path,
+            Method = httpContext.Request.Method,
             Errors = appErrors.Select(e => new ApiError(e.Code,e.Message,e.PropertyName)).ToList()
         };
     }

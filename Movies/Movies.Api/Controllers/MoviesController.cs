@@ -3,6 +3,7 @@ using Movies.Api.Mappings;
 using Movies.Api.Routes;
 using Movies.Application.Features.Movie.Services;
 using Movies.Contracts.Requests.MovieRequest;
+using Movies.Contracts.Responses;
 using Movies.Contracts.Responses.MovieResponse;
 
 namespace Movies.Api.Controllers;
@@ -28,8 +29,8 @@ public class MoviesController(IMovieService movieService) : ControllerBase
 
 
     [HttpPost(MoviesEndpoints.Create)]
-    [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status201Created)]
+    [ProducesResponseType<AppProblemDetails>(StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> Create([FromBody] CreateMovieRequest request, CancellationToken cancellationToken)
     {
         var command = request.ToCreateMovieDto();
