@@ -42,3 +42,26 @@ my movies api for learning rest api development in asp.net core using web api
 
 > in application I have made many things internal which i don't think should be accessed directly from api.
 > like applicationDbContext, repository, entity and configurations for entity and so on..  
+
+
+
+
+
+| Failure Type                     | Common Real-World Status Code                                          |
+| -------------------------------- | ---------------------------------------------------------------------- |
+| **Validation errors**            | `400 Bad Request`                                                      |
+| **Business rule violations**     | ✅ Some teams use `422`, but <br>❌ Most default to `400` for simplicity |
+| **Duplicate data (e.g., email)** | Usually `400`, some use `409 Conflict`                                 |
+| **Authorization failures**       | `403 Forbidden`                                                        |
+| **Unexpected errors**            | `500 Internal Server Error`                                            |
+
+
+
+✅ Short Answer (Pragmatic):
+Use Task<Result<MovieDto>> — you don't need MovieDto? inside Result<...> unless you want to distinguish between:
+
+Operation succeeded, but value is null vs.
+
+Operation failed.
+
+In most clean implementations of Result<T>, the absence of value is already implied by Result.Failure(...), so MovieDto (non-nullable) is sufficient.

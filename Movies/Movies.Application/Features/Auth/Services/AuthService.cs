@@ -1,5 +1,4 @@
 ﻿using FluentValidation;
-using FluentValidation.Results;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Options;
 using Movies.Application.Data;
@@ -23,12 +22,16 @@ internal class AuthService(
 {
     private readonly FrontendSettings _frontendSettings = optionsFrontend.Value;
 
-    public async Task RegisterAsync(RegisterDto register)
+    public async Task<Result> RegisterAsync(RegisterDto register)
     {
 
         var validationResult = await registerValidator.ValidateAsync(register);
 
-        await registerValidator.ValidateAndThrowAsync(register);
+        if (!validationResult.IsValid)
+        {
+            return Result.Failure(validationResult.Errors.ToAppErrors());
+        }
+        
         
         await using var transaction = await db.Database.BeginTransactionAsync();
 
@@ -42,10 +45,20 @@ internal class AuthService(
                 UserName = register.Email,
             };
 
-            var result = await userManager.CreateAsync(user, register.Password);
-            ThrowIfFailed(result);
-            result = await userManager.AddToRoleAsync(user, Role.User);
-            ThrowIfFailed(result);
+            var createResult = await userManager.CreateAsync(user, register.Password);
+
+            if (!createResult.Succeeded)
+            {
+                return Result.Failure(createResult.Errors.ToAppErrors());
+            }
+            
+            var roleResult = await userManager.AddToRoleAsync(user, Role.User);
+            
+            if (!roleResult.Succeeded)
+            {
+                return Result.Failure(roleResult.Errors.ToAppErrors());
+            }
+            
 
             var token = await userManager.GenerateEmailConfirmationTokenAsync(user);
             var callbackUrl =
@@ -55,6 +68,8 @@ internal class AuthService(
                 $"""Please verify your account by clicking : <a href="{callbackUrl}" target="_blank">here</a>""");
 
             await transaction.CommitAsync();
+            
+            return Result.Success();
         }
         catch (Exception e)
         {
@@ -81,17 +96,10 @@ internal class AuthService(
 
         return result.Succeeded ? Result.Success() : Result.Failure(result.Errors.ToAppErrors());
     }
-
-
-    private static void ThrowIfFailed(IdentityResult result)
-    {
-        if (result.Succeeded) return;
-
-        var validationFailures = result.Errors
-            .Select(error => new ValidationFailure(error.Code, error.Description));
-
-        throw new ValidationException(validationFailures);
-    }
+    
+    
+    
+    
 }
 
 

@@ -15,14 +15,14 @@ public class MoviesController(IMovieService movieService) : ControllerBase
     [ProducesResponseType<MovieResponse>(StatusCodes.Status200OK)]
     public async Task<IActionResult> Get([FromRoute] Guid id, CancellationToken cancellationToken)
     {
-        var movieDto = await movieService.GetByIdAsync(id, cancellationToken);
+        var result = await movieService.GetByIdAsync(id, cancellationToken);
 
-        if (movieDto is null)
+        if (result.IsFailure)
         {
             return NotFound();
         }
 
-        var response = movieDto.ToMovieResponse();
+        var response = result.Value.ToMovieResponse();
         return Ok(response);
     }
 
@@ -33,14 +33,15 @@ public class MoviesController(IMovieService movieService) : ControllerBase
     public async Task<IActionResult> Create([FromBody] CreateMovieRequest request, CancellationToken cancellationToken)
     {
         var command = request.ToCreateMovieDto();
-        var movieId = await movieService.CreateAsync(command, cancellationToken);
+        var result = await movieService.CreateAsync(command, cancellationToken);
 
-        if (movieId is null)
+        if (result.IsFailure)
         {
-            return BadRequest();
+            var appProblemDetails = result.AppErrors.ToAppProblemDetails(HttpContext);
+            return BadRequest(appProblemDetails);
         }
 
-        return CreatedAtAction(nameof(Get), new { id = movieId.Value }, null);
+        return CreatedAtAction(nameof(Get), new { id = result.Value }, null);
     }
     
 }
