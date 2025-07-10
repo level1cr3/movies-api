@@ -2,36 +2,37 @@
 
 public class Result
 {
-    protected internal Result(bool isSuccess, List<Error>? errors = null)
+    protected internal Result(bool isSuccess, List<AppError>? appErrors = null)
     {
         switch (isSuccess)
         {
-            case true when errors?.Count > 0:
+            case true when appErrors?.Count > 0:
                 throw new InvalidOperationException("Success result cannot contain errors.");
-            case false when (errors is null || errors.Count == 0):
+            case false when (appErrors is null || appErrors.Count == 0):
                 throw new InvalidOperationException("Failure result must contain at least one error.");
         }
 
 
         IsSuccess = isSuccess;
-        Errors = errors is null ? [] : [..errors];
+        AppErrors = appErrors is null ? [] : [..appErrors];
     }
 
     public bool IsSuccess { get; }
-    public IReadOnlyList<Error> Errors { get; }
+    public bool IsFailure => !IsSuccess;
+    public IReadOnlyList<AppError> AppErrors { get; }
 
     public static Result Success() => new(true);
-    public static Result Failure(List<Error> errors) => new(false, errors);
+    public static Result Failure(List<AppError> appErrors) => new(false, appErrors);
     
     public static Result<TValue> Success<TValue>(TValue value) => new(value,true);
-    public static Result<TValue> Failure<TValue>(List<Error> errors) => new(default, false, errors);
+    public static Result<TValue> Failure<TValue>(List<AppError> appErrors) => new(default, false, appErrors);
 }
 
 public class Result<TValue> : Result
 {
     private readonly TValue? _value;
 
-    protected internal Result(TValue? value,bool isSuccess, List<Error>? errors = null) : base(isSuccess, errors)
+    protected internal Result(TValue? value,bool isSuccess, List<AppError>? appErrors = null) : base(isSuccess, appErrors)
     {
         _value = value;
     }

@@ -7,7 +7,10 @@ using Movies.Application.Data.Entities;
 using Movies.Application.DTOs.Auth;
 using Movies.Application.Email;
 using Movies.Application.Features.Auth.Constants;
+using Movies.Application.Features.Auth.Errors;
+using Movies.Application.Features.Auth.Mappings;
 using Movies.Application.Settings;
+using Movies.Application.Shared.Foundation;
 
 namespace Movies.Application.Features.Auth.Services;
 
@@ -60,26 +63,23 @@ internal class AuthService(
         }
     }
 
-    public async Task ConfirmEmailAsync(string userId, string token)
+    public async Task<Result> ConfirmEmailAsync(string userId, string token)
     {
         var user = await userManager.FindByIdAsync(userId);
 
         if (user is null)
         {
-            return;
+            return Result.Failure([EmailConfirmationErrors.InvalidRequest]);
         }
 
         if (user.EmailConfirmed)
         {
-            return;
-            // already confirmed.
+            return Result.Success();
         }
 
         var result = await userManager.ConfirmEmailAsync(user, token);
 
-        // return result.Succeeded;
-
-        return;
+        return result.Succeeded ? Result.Success() : Result.Failure(result.Errors.ToAppErrors());
     }
 
 
