@@ -16,6 +16,7 @@ namespace Movies.Application.Features.Auth.Services;
 internal class AuthService(
     ApplicationDbContext db,
     UserManager<ApplicationUser> userManager,
+    SignInManager<ApplicationUser> signInManager,
     IEmailService emailService,
     IOptions<FrontendSettings> optionsFrontend,
     IValidator<RegisterDto> registerValidator) : IAuthService
@@ -24,15 +25,14 @@ internal class AuthService(
 
     public async Task<Result> RegisterAsync(RegisterDto register)
     {
-
         var validationResult = await registerValidator.ValidateAsync(register);
 
         if (!validationResult.IsValid)
         {
             return Result.Failure(validationResult.Errors.ToAppErrors());
         }
-        
-        
+
+
         await using var transaction = await db.Database.BeginTransactionAsync();
 
         try
@@ -51,14 +51,14 @@ internal class AuthService(
             {
                 return Result.Failure(createResult.Errors.ToAppErrors());
             }
-            
+
             var roleResult = await userManager.AddToRoleAsync(user, Role.User);
-            
+
             if (!roleResult.Succeeded)
             {
                 return Result.Failure(roleResult.Errors.ToAppErrors());
             }
-            
+
 
             var token = await userManager.GenerateEmailConfirmationTokenAsync(user);
             var callbackUrl =
@@ -68,7 +68,7 @@ internal class AuthService(
                 $"""Please verify your account by clicking : <a href="{callbackUrl}" target="_blank">here</a>""");
 
             await transaction.CommitAsync();
-            
+
             return Result.Success();
         }
         catch (Exception e)
@@ -96,11 +96,40 @@ internal class AuthService(
 
         return result.Succeeded ? Result.Success() : Result.Failure(result.Errors.ToAppErrors());
     }
-    
-    
-    
-    
+
+    public async Task<Result<string>> Login(string username, string password)
+    {
+        var signInResult = await signInManager.PasswordSignInAsync(username, password, false, true);
+
+        if (!signInResult.Succeeded)
+        {
+            if (signInResult.IsNotAllowed)
+            {
+                return Result.Failure<string>([LoginErrors.NotAllowed]);
+            }
+
+            if (signInResult.IsLockedOut)
+            {
+                return Result.Failure<string>([LoginErrors.LockedOut]);
+            }
+
+            return Result.Failure<string>([LoginErrors.Invalid]);
+        }
+        
+        // TODO : generate JWT token
+        var jwt = "token";
+        return Result.Success(jwt);
+    }
 }
+
+
+
+
+
+
+
+
+
 
 
 /*

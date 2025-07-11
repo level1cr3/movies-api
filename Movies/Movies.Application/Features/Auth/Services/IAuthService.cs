@@ -8,5 +8,6 @@ public interface IAuthService
     Task<Result> RegisterAsync(RegisterDto register);
     
     Task<Result> ConfirmEmailAsync(string userId, string token);
-    
+
+    Task<Result<string>> Login(string username, string password);
 }

@@ -49,4 +49,13 @@ public class AuthController(IAuthService authService) : ControllerBase
 
 
 
+    [HttpPost(AuthEndpoints.Login)]
+    public async Task<IActionResult> Login([FromBody] LoginRequest request)
+    {
+        
+        throw new NotImplementedException();
+    }
+
+    
+    
 }

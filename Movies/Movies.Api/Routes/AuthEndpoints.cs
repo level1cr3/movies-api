@@ -7,6 +7,8 @@ public static class AuthEndpoints
     public const string Register = $"{Base}/register";
 
     public const string ConfirmEmail = $"{Base}/confirm-email";
+
+    public const string Login = $"{Base}/login";
 }
 
 
