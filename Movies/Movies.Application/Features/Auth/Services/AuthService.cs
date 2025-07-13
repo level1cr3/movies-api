@@ -16,10 +16,11 @@ namespace Movies.Application.Features.Auth.Services;
 internal class AuthService(
     ApplicationDbContext db,
     UserManager<ApplicationUser> userManager,
-    SignInManager<ApplicationUser> signInManager,
     IEmailService emailService,
     IOptions<FrontendSettings> optionsFrontend,
-    IValidator<RegisterDto> registerValidator) : IAuthService
+    IValidator<RegisterDto> registerValidator,
+    SignInManager<ApplicationUser> signInManager,
+    IJwtTokenGenerator jwtTokenGenerator) : IAuthService
 {
     private readonly FrontendSettings _frontendSettings = optionsFrontend.Value;
 
@@ -97,9 +98,17 @@ internal class AuthService(
         return result.Succeeded ? Result.Success() : Result.Failure(result.Errors.ToAppErrors());
     }
 
-    public async Task<Result<string>> Login(string username, string password)
+    public async Task<Result<string>> Login(string email, string password)
     {
-        var signInResult = await signInManager.PasswordSignInAsync(username, password, false, true);
+        var user = await userManager.FindByEmailAsync(email);
+
+        if (user is null)
+        {
+            return Result.Failure<string>([LoginErrors.Invalid]);
+        }
+        
+        var roles = await userManager.GetRolesAsync(user);
+        var signInResult = await signInManager.PasswordSignInAsync(user, password, false, true);
 
         if (!signInResult.Succeeded)
         {
@@ -115,11 +124,12 @@ internal class AuthService(
 
             return Result.Failure<string>([LoginErrors.Invalid]);
         }
-        
-        // TODO : generate JWT token
-        var jwt = "token";
+
+        var jwt = jwtTokenGenerator.GenerateToken(user,roles);
         return Result.Success(jwt);
     }
+    
+    
 }
 
 

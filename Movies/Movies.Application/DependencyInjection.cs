@@ -21,7 +21,7 @@ public static class DependencyInjection
     {
         AddPersistence(services, configuration);
         AddEmailConfiguration(services, configuration);
-        AddAuthentication(services);
+        AddAuthentication(services, configuration);
         AddServices(services);
 
         services.Configure<FrontendSettings>(configuration.GetSection("Frontend"));
@@ -43,32 +43,25 @@ public static class DependencyInjection
         services.AddScoped<IUnitOfWork, UnitOfWork>();
         services.AddScoped<IMovieRepository, MovieRepository>();
     }
-    
+
     private static void AddEmailConfiguration(IServiceCollection services, IConfiguration configuration)
     {
         services.Configure<EmailSettings>(configuration.GetSection("Email"));
         services.AddScoped<IEmailService, EmailService>();
     }
-    
-    private static void AddAuthentication(IServiceCollection services)
+
+    private static void AddAuthentication(IServiceCollection services, IConfiguration configuration)
     {
         services.AddIdentity<ApplicationUser, ApplicationRole>()
             .AddEntityFrameworkStores<ApplicationDbContext>()
             .AddDefaultTokenProviders();
+        
+        services.Configure<JwtSettings>(configuration.GetSection("Jwt"));
     }
 
     private static void AddServices(IServiceCollection services)
     {
         services.AddScoped<IAuthService, AuthService>();
-        services.AddScoped<IMovieService,MovieService>();
+        services.AddScoped<IMovieService, MovieService>();
     }
-    
-
-    
-    
-    
-    
-    
-    
-    
 }
