@@ -1,10 +1,10 @@
-﻿namespace Movies.Application.DTOs.Auth;
+﻿namespace Movies.Application.Features.Auth.DTOs;
 
 public record RegisterDto
 {
     public required string FirstName { get; init; }
 
-    public string? LastName { get; init; } = null;
+    public string? LastName { get; init; }
 
     public required string Email { get; init; }
 

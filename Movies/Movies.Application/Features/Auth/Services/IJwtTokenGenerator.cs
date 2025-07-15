@@ -1,8 +1,9 @@
 using Movies.Application.Data.Entities;
+using Movies.Application.Features.Auth.DTOs;
 
 namespace Movies.Application.Features.Auth.Services;
 
 internal interface IJwtTokenGenerator
 {
-    string GenerateToken(ApplicationUser user, IEnumerable<string> roles);
+     AuthTokenDto GenerateToken(ApplicationUser user, IEnumerable<string> roles);
 }

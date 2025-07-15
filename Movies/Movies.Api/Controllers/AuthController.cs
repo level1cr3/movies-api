@@ -64,7 +64,8 @@ public class AuthController(IAuthService authService) : ControllerBase
             return BadRequest(appProblemDetails);
         }
 
-        return Ok(result.Value);
+        var loginResponse = result.Value.ToLoginResponse();
+        return Ok(loginResponse);
     }
 
     

@@ -1,5 +1,5 @@
 ﻿using FluentValidation;
-using Movies.Application.DTOs.Auth;
+using Movies.Application.Features.Auth.DTOs;
 
 namespace Movies.Application.Features.Auth.Validators;
 

@@ -3,9 +3,9 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Options;
 using Movies.Application.Data;
 using Movies.Application.Data.Entities;
-using Movies.Application.DTOs.Auth;
 using Movies.Application.Email;
 using Movies.Application.Features.Auth.Constants;
+using Movies.Application.Features.Auth.DTOs;
 using Movies.Application.Features.Auth.Errors;
 using Movies.Application.Features.Auth.Mappings;
 using Movies.Application.Settings;
@@ -98,13 +98,13 @@ internal class AuthService(
         return result.Succeeded ? Result.Success() : Result.Failure(result.Errors.ToAppErrors());
     }
 
-    public async Task<Result<string>> LoginAsync(string email, string password)
+    public async Task<Result<AuthTokenDto>> LoginAsync(string email, string password)
     {
         var user = await userManager.FindByEmailAsync(email);
 
         if (user is null)
         {
-            return Result.Failure<string>([LoginErrors.Invalid]);
+            return Result.Failure<AuthTokenDto>([LoginErrors.Invalid]);
         }
         
         var roles = await userManager.GetRolesAsync(user);
@@ -114,19 +114,19 @@ internal class AuthService(
         {
             if (signInResult.IsNotAllowed)
             {
-                return Result.Failure<string>([LoginErrors.NotAllowed]);
+                return Result.Failure<AuthTokenDto>([LoginErrors.NotAllowed]);
             }
 
             if (signInResult.IsLockedOut)
             {
-                return Result.Failure<string>([LoginErrors.LockedOut]);
+                return Result.Failure<AuthTokenDto>([LoginErrors.LockedOut]);
             }
 
-            return Result.Failure<string>([LoginErrors.Invalid]);
+            return Result.Failure<AuthTokenDto>([LoginErrors.Invalid]);
         }
 
-        var jwt = jwtTokenGenerator.GenerateToken(user,roles);
-        return Result.Success(jwt);
+        var authTokenDto = jwtTokenGenerator.GenerateToken(user,roles);
+        return Result.Success(authTokenDto);
     }
 
     
