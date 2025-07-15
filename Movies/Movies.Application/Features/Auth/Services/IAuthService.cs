@@ -9,5 +9,5 @@ public interface IAuthService
     
     Task<Result> ConfirmEmailAsync(string userId, string token);
 
-    Task<Result<string>> Login(string username, string password);
+    Task<Result<string>> LoginAsync(string email, string password);
 }

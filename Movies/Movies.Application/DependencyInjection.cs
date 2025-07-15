@@ -1,8 +1,11 @@
-﻿using FluentValidation;
+﻿using System.Text;
+using FluentValidation;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.IdentityModel.Tokens;
 using Movies.Application.Data;
 using Movies.Application.Data.Entities;
 using Movies.Application.Data.Repositories;
@@ -57,6 +60,30 @@ public static class DependencyInjection
             .AddDefaultTokenProviders();
         
         services.Configure<JwtSettings>(configuration.GetSection("Jwt"));
+        services.AddScoped<IJwtTokenGenerator, JwtTokenGenerator>();
+
+        var jwtSettings = configuration.GetSection("Jwt").Get<JwtSettings>() 
+                          ?? throw new InvalidOperationException("Jwt configuration is not available.");
+            
+        services.AddAuthentication(option =>
+        {
+            option.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+            option.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+            option.DefaultScheme = JwtBearerDefaults.AuthenticationScheme;
+        }).AddJwtBearer(option =>
+        {
+            option.TokenValidationParameters = new TokenValidationParameters
+            {
+                ValidIssuer = jwtSettings.Issuer,
+                ValidAudience = jwtSettings.Audience,
+                IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSettings.Secret)),
+                
+                ValidateIssuer = true,
+                ValidateAudience = true,
+                ValidateIssuerSigningKey = true,
+                ValidateLifetime = true
+            };
+        });
     }
 
     private static void AddServices(IServiceCollection services)
@@ -64,4 +91,5 @@ public static class DependencyInjection
         services.AddScoped<IAuthService, AuthService>();
         services.AddScoped<IMovieService, MovieService>();
     }
+    
 }

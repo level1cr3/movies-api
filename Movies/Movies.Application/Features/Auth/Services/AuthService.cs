@@ -98,7 +98,7 @@ internal class AuthService(
         return result.Succeeded ? Result.Success() : Result.Failure(result.Errors.ToAppErrors());
     }
 
-    public async Task<Result<string>> Login(string email, string password)
+    public async Task<Result<string>> LoginAsync(string email, string password)
     {
         var user = await userManager.FindByEmailAsync(email);
 
@@ -128,6 +128,8 @@ internal class AuthService(
         var jwt = jwtTokenGenerator.GenerateToken(user,roles);
         return Result.Success(jwt);
     }
+
+    
     
     
 }
