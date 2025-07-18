@@ -16,18 +16,18 @@ internal sealed class RefreshToken
     
     public required DateTime ExpiresAt { get; init; }
 
-    public bool IsRevoked { get; init; }
+    public bool IsRevoked { get; set; }
     
-    public DateTime? RevokedAt { get; init; }
+    public DateTime? RevokedAt { get; set; }
     
     [MaxLength(45)]
-    public string? RevokedByIp { get; init; }
+    public string? RevokedByIp { get; set; }
 
     [MaxLength(100)]
-    public string? RevokedReason { get; init; }
+    public string? RevokedReason { get; set; }
 
     
-    public Guid? ReplacedByTokenId { get; init; }
+    public Guid? ReplacedByTokenId { get; set; }
     public RefreshToken? ReplacedByToken { get; init; }
     
     public required Guid UserId { get; init; }

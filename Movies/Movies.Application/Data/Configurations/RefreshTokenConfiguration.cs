@@ -15,6 +15,8 @@ internal class RefreshTokenConfiguration : IEntityTypeConfiguration<RefreshToken
             .IsRequired()
             .HasMaxLength(256);
 
+        builder.HasIndex(rt => rt.Token).IsUnique().HasDatabaseName("refresh_token_idx");
+        
         builder.Property(rt => rt.CreatedByIp).IsRequired().HasMaxLength(45);
         
         builder.Property(rt => rt.CreatedAt).IsRequired();

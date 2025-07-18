@@ -125,7 +125,7 @@ internal class AuthService(
             return Result.Failure<AuthTokenDto>([LoginErrors.Invalid]);
         }
 
-        var authTokenDto = jwtTokenGenerator.GenerateToken(user,roles);
+        var authTokenDto = await jwtTokenGenerator.GenerateTokenAsync(user,roles);
         return Result.Success(authTokenDto);
     }
 

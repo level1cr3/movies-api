@@ -9,12 +9,14 @@ using Microsoft.IdentityModel.Tokens;
 using Movies.Application.Data;
 using Movies.Application.Data.Entities;
 using Movies.Application.Data.Repositories;
+using Movies.Application.Data.Repositories.JwtRefreshToken;
 using Movies.Application.Data.Repositories.Movies;
 using Movies.Application.Data.Seeder;
 using Movies.Application.Email;
 using Movies.Application.Features.Auth.Services;
 using Movies.Application.Features.Movie.Services;
 using Movies.Application.Settings;
+using Movies.Application.Shared.Foundation;
 
 namespace Movies.Application;
 
@@ -45,6 +47,7 @@ public static class DependencyInjection
         services.AddScoped<IDataSeeder, DataSeeder>();
         services.AddScoped<IUnitOfWork, UnitOfWork>();
         services.AddScoped<IMovieRepository, MovieRepository>();
+        services.AddScoped<IRefreshTokenRepository, RefreshTokenRepository>();
     }
 
     private static void AddEmailConfiguration(IServiceCollection services, IConfiguration configuration)
@@ -58,13 +61,13 @@ public static class DependencyInjection
         services.AddIdentity<ApplicationUser, ApplicationRole>()
             .AddEntityFrameworkStores<ApplicationDbContext>()
             .AddDefaultTokenProviders();
-        
+
         services.Configure<JwtSettings>(configuration.GetSection("Jwt"));
         services.AddScoped<IJwtTokenGenerator, JwtTokenGenerator>();
 
-        var jwtSettings = configuration.GetSection("Jwt").Get<JwtSettings>() 
+        var jwtSettings = configuration.GetSection("Jwt").Get<JwtSettings>()
                           ?? throw new InvalidOperationException("Jwt configuration is not available.");
-            
+
         services.AddAuthentication(option =>
         {
             option.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
@@ -77,7 +80,7 @@ public static class DependencyInjection
                 ValidIssuer = jwtSettings.Issuer,
                 ValidAudience = jwtSettings.Audience,
                 IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSettings.Secret)),
-                
+
                 ValidateIssuer = true,
                 ValidateAudience = true,
                 ValidateIssuerSigningKey = true,
@@ -90,6 +93,6 @@ public static class DependencyInjection
     {
         services.AddScoped<IAuthService, AuthService>();
         services.AddScoped<IMovieService, MovieService>();
+        services.AddScoped<IRequestContextService, RequestContextService>();
     }
-    
 }
