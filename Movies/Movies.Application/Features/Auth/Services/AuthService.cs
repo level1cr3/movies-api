@@ -200,4 +200,96 @@ You are implementing unit tests and want to mock a simpler abstraction.
 
 You're building a domain-driven design (DDD) style system, where you're wrapping EF-related services behind a domain-specific repository interface.
 
+
+
+# How would we make sure that user is logged in on single device at a time ?
+
+Best Practice: On login, revoke existing tokens and issue new ones
+   Before issuing new tokens, revoke all active refresh tokens for the user.
+   
+   Then generate a fresh refresh/access token pair for the new session.
+   
+   This ensures:
+   
+   Any previous device or session will no longer be able to use its refresh token to get new access tokens.
+   
+   Only the most recent login is allowed to stay active.
+
+
+
+🧠 What to Revoke?
+   You should revoke:
+   
+   All refresh tokens where:
+   
+   UserId == current user
+   
+   IsRevoked == false
+   
+   
+   
+public async Task RevokeAllActiveTokensAsync(Guid userId, string ip, string reason, CancellationToken cancellationToken = default)
+   {
+       var activeTokens = await db.RefreshTokens
+           .Where(t => t.UserId == userId && !t.IsRevoked && t.ExpiresAt > DateTime.UtcNow)
+           .ToListAsync(cancellationToken);
+   
+       foreach (var token in activeTokens)
+       {
+           token.IsRevoked = true;
+           token.RevokedAt = DateTime.UtcNow;
+           token.RevokedByIp = ip;
+           token.RevokedReason = reason;
+       }
+   
+       await db.SaveChangesAsync(cancellationToken);
+   }
+   
+   
+During login
+
+await RevokeAllActiveTokensAsync(user.Id, ipAddress, "New Login", cancellationToken);
+   var newRefreshToken = GenerateRefreshToken(...);
+   // Save and return the new token
+         
+What's considered good enough in production?
+   Most secure systems accept a short window of overlap, and do this:
+   
+   Access token TTL is short, e.g., 5–10 minutes.
+   
+   Refresh token is long-lived, but gets revoked on new login.
+   
+   Rotate refresh tokens with each use (helps detect theft).
+   
+   
+   
+   
+*** Use iat (issued-at) in access tokens, and store lastLoginAt per user:
+   
+            You can reject tokens issued before lastLoginAt if you want to be more aggressive.
+
+At login :
+user.LastLoginAt = DateTime.UtcNow;
+
+At API auth: I would need to create custom auth policy for all users or roles that would be applicable.
+
+var tokenIssuedAt = jwtPayload.iat; // Unix timestamp
+   if (tokenIssuedAt < user.LastLoginAt)
+   {
+       reject("Token issued before last login.");
+   }
+   
+Now you can instantly expire all old tokens — but at the cost of a DB call on each request.         
+   
+
+
+
+## for logout
+*** i should blacklist jwt in memory for. time it is valid for like 15 minutes. but then it would require me
+ to write custom middleware to check if jwt is blacklisted for every request. which then is kinda of bad.
+ 
+ and if we are having to do all these then maybe we should consider moving from jwt to cookie based application 
+ and drop idea of api to begin with i think
+
+
  */
