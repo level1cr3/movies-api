@@ -18,9 +18,9 @@ public static class AuthMapping
     }
 
 
-    public static LoginResponse ToLoginResponse(this AuthTokenDto tokenDto)
+    public static TokenResponse ToTokenResponse(this AuthTokenDto tokenDto)
     {
-        return new LoginResponse
+        return new TokenResponse
         {
             AccessToken = tokenDto.AccessToken,
             ExpiresIn = tokenDto.ExpiresIn,

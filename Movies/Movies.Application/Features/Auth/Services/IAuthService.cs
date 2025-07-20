@@ -10,4 +10,6 @@ public interface IAuthService
     Task<Result> ConfirmEmailAsync(string userId, string token);
 
     Task<Result<AuthTokenDto>> LoginAsync(string email, string password);
+    
+    Task<Result<AuthTokenDto>> RefreshTokenAsync(string token);
 }

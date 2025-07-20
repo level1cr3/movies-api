@@ -10,6 +10,6 @@ internal interface IRefreshTokenRepository
 
     void Create(RefreshToken refreshToken);
 
-    Task Revoke(Guid id, string revokeReason, string revokeByIp, Guid? replaceByTokenId = null,
+    Task RevokeAsync(Guid id, string revokeReason, string revokeByIp, Guid? replaceByTokenId = null,
         CancellationToken cancellationToken = default);
 }

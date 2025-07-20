@@ -59,18 +59,21 @@ internal class JwtTokenGenerator(
         var token = tokenHandler.CreateToken(tokenDescriptor);
         var jwt = tokenHandler.WriteToken(token);
 
+        var (refreshToken, refreshTokenId) = await GenerateRefreshTokenAsync(user.Id);
+        
         var authTokenDto = new AuthTokenDto
         {
             AccessToken = jwt,
             ExpiresIn = (int)(expires - now).TotalSeconds,
             TokenType = JwtBearerDefaults.AuthenticationScheme,
-            RefreshToken = await GenerateRefreshTokenAsync(user.Id)
+            RefreshToken = refreshToken,
+            RefreshTokenId = refreshTokenId
         };
 
         return authTokenDto;
     }
 
-    private async Task<string> GenerateRefreshTokenAsync(Guid userId)
+    private async Task<(string refreshToken, Guid refreshTokenId)> GenerateRefreshTokenAsync(Guid userId)
     {
          var token= Convert.ToBase64String(RandomNumberGenerator.GetBytes(32));
          var now = DateTime.UtcNow;
@@ -90,10 +93,13 @@ internal class JwtTokenGenerator(
          if (rowsAffected < 1)
          {
              logger.LogError("Failed to save refresh token for user {UserId}", userId);
-             return string.Empty;
+             return (string.Empty, Guid.Empty);
          }
          
-         return token;
+         return (token, refreshToken.Id);
+         
+         // Note : If the return ever grows, refactor to an object easily.
+         // For now: Stick with the tuple!
     }
     
     

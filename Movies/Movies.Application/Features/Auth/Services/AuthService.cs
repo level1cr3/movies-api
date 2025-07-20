@@ -3,6 +3,8 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Options;
 using Movies.Application.Data;
 using Movies.Application.Data.Entities;
+using Movies.Application.Data.Repositories;
+using Movies.Application.Data.Repositories.JwtRefreshToken;
 using Movies.Application.Email;
 using Movies.Application.Features.Auth.Constants;
 using Movies.Application.Features.Auth.DTOs;
@@ -20,7 +22,10 @@ internal class AuthService(
     IOptions<FrontendSettings> optionsFrontend,
     IValidator<RegisterDto> registerValidator,
     SignInManager<ApplicationUser> signInManager,
-    IJwtTokenGenerator jwtTokenGenerator) : IAuthService
+    IJwtTokenGenerator jwtTokenGenerator,
+    IRefreshTokenRepository refreshTokenRepository,
+    IRequestContextService requestContextService,
+    IUnitOfWork unitOfWork) : IAuthService
 {
     private readonly FrontendSettings _frontendSettings = optionsFrontend.Value;
 
@@ -106,7 +111,7 @@ internal class AuthService(
         {
             return Result.Failure<AuthTokenDto>([LoginErrors.Invalid]);
         }
-        
+
         var roles = await userManager.GetRolesAsync(user);
         var signInResult = await signInManager.PasswordSignInAsync(user, password, false, true);
 
@@ -125,23 +130,37 @@ internal class AuthService(
             return Result.Failure<AuthTokenDto>([LoginErrors.Invalid]);
         }
 
-        var authTokenDto = await jwtTokenGenerator.GenerateTokenAsync(user,roles);
+        var authTokenDto = await jwtTokenGenerator.GenerateTokenAsync(user, roles);
         return Result.Success(authTokenDto);
     }
 
-    
-    
-    
+    public async Task<Result<AuthTokenDto>> RefreshTokenAsync(string token)
+    {
+        var dbRefreshToken = await refreshTokenRepository.GetByRefreshTokenAsync(token);
+        var clientIp = requestContextService.GetClientIp();
+
+        if (dbRefreshToken is null)
+        {
+            return Result.Failure<AuthTokenDto>([RefreshTokenErrors.Invalid]);
+        }
+
+        if (dbRefreshToken.IsRevoked)
+        {
+            await refreshTokenRepository
+                .RevokeAsync(dbRefreshToken.Id, RefreshTokenRevokeReason.ReuseDetected, clientIp);
+            
+            return Result.Failure<AuthTokenDto>([RefreshTokenErrors.Invalid]);
+        }
+
+        var roles = await userManager.GetRolesAsync(dbRefreshToken.User);
+        var authToken = await jwtTokenGenerator.GenerateTokenAsync(dbRefreshToken.User, roles);
+        
+        await refreshTokenRepository
+            .RevokeAsync(dbRefreshToken.Id, RefreshTokenRevokeReason.TokenRotated, clientIp,authToken.RefreshTokenId);
+        
+        return Result.Success(authToken);
+    }
 }
-
-
-
-
-
-
-
-
-
 
 
 /*

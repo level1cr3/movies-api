@@ -6,6 +6,7 @@ using Movies.Application.Features.Auth.Constants;
 using Movies.Application.Features.Auth.Services;
 using Movies.Contracts.Requests.Auth;
 using Movies.Contracts.Responses;
+using Movies.Contracts.Responses.Auth;
 
 namespace Movies.Api.Controllers;
 
@@ -52,7 +53,7 @@ public class AuthController(IAuthService authService) : ControllerBase
 
 
     [HttpPost(AuthEndpoints.Login)]
-    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType<TokenResponse>(StatusCodes.Status200OK)]
     [ProducesResponseType<AppProblemDetails>(StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> Login([FromBody] LoginRequest request)
     {
@@ -64,12 +65,62 @@ public class AuthController(IAuthService authService) : ControllerBase
             return BadRequest(appProblemDetails);
         }
 
-        var loginResponse = result.Value.ToLoginResponse();
-        return Ok(loginResponse);
+        var tokenResponse = result.Value.ToTokenResponse();
+        return Ok(tokenResponse);
     }
 
     
+    [HttpPost(AuthEndpoints.RefreshToken)]
+    [ProducesResponseType<TokenResponse>(StatusCodes.Status200OK)]
+    [ProducesResponseType<AppProblemDetails>(StatusCodes.Status400BadRequest)]
+    public async Task<IActionResult> RefreshToken([FromBody] RefreshTokenRequest request)
+    {
+        var result = await authService.RefreshTokenAsync(request.Token);
         
+        if (result.IsFailure)
+        {
+            var appProblemDetails = result.AppErrors.ToAppProblemDetails(HttpContext);
+            return BadRequest(appProblemDetails);
+        }
+        
+        var tokenResponse = result.Value.ToTokenResponse();
+        return Ok(tokenResponse);
+    }
+
+    
+    // finsh the refresh token thing and then pass cancellation token where the could be used.
+    // build logout functionality
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    // Todo : Delete later where created only for testing.
     [Authorize]
     [HttpGet("auth-test")]
     public IActionResult Method()

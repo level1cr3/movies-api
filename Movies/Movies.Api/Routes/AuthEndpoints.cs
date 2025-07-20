@@ -9,6 +9,8 @@ public static class AuthEndpoints
     public const string ConfirmEmail = $"{Base}/confirm-email";
 
     public const string Login = $"{Base}/login";
+    
+    public const string RefreshToken = $"{Base}/refresh-token";
 }
 
 

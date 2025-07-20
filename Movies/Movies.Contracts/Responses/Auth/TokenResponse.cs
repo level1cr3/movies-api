@@ -1,6 +1,6 @@
 ﻿namespace Movies.Contracts.Responses.Auth;
 
-public sealed record LoginResponse
+public sealed record TokenResponse
 {
     public required string AccessToken { get; init; }
     
