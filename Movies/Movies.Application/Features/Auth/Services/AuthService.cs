@@ -62,14 +62,8 @@ internal class AuthService(
             {
                 return Result.Failure(roleResult.Errors.ToAppErrors());
             }
-
-
-            var token = await userManager.GenerateEmailConfirmationTokenAsync(user);
-            var callbackUrl =
-                $"{_frontendSettings.BaseUrl.TrimEnd('/')}{_frontendSettings.EmailConfirmationPath}?userId={Uri.EscapeDataString(user.Id.ToString())}&token={Uri.EscapeDataString(token)}";
-
-            await emailService.SendAsync(user.Email, "Verify your email",
-                $"""Please verify your account by clicking : <a href="{callbackUrl}" target="_blank">here</a>""");
+            
+            await SendConfirmationEmailAsync(user);
 
             await transaction.CommitAsync(cancellationToken);
 
@@ -82,7 +76,8 @@ internal class AuthService(
         }
     }
 
-    public async Task<Result> ConfirmEmailAsync(string userId, string token, CancellationToken cancellationToken = default)
+    public async Task<Result> ConfirmEmailAsync(string userId, string token,
+        CancellationToken cancellationToken = default)
     {
         var user = await userManager.FindByIdAsync(userId);
 
@@ -101,7 +96,27 @@ internal class AuthService(
         return result.Succeeded ? Result.Success() : Result.Failure(result.Errors.ToAppErrors());
     }
 
-    public async Task<Result<AuthTokenDto>> LoginAsync(string email, string password, CancellationToken cancellationToken = default)
+    public async Task<Result> ResendConfirmEmailAsync(string email, CancellationToken cancellationToken = default)
+    {
+        // { } is a property pattern that matches any non-null object.
+        // if (await userManager.FindByEmailAsync(email) is not { } user || user.EmailConfirmed) 
+        // {
+        //     return Result.Success(); // return success to prevent user enumeration error.
+        // }
+
+        var user = await userManager.FindByEmailAsync(email);
+
+        if (user is null || user.EmailConfirmed)
+        {
+            return Result.Success(); // return success to prevent user enumeration error.
+        }
+        
+        await SendConfirmationEmailAsync(user);
+        return Result.Success();
+    }
+
+    public async Task<Result<AuthTokenDto>> LoginAsync(string email, string password,
+        CancellationToken cancellationToken = default)
     {
         var user = await userManager.FindByEmailAsync(email);
 
@@ -132,7 +147,8 @@ internal class AuthService(
         return Result.Success(authTokenDto);
     }
 
-    public async Task<Result<AuthTokenDto>> RefreshTokenAsync(string token, CancellationToken cancellationToken = default)
+    public async Task<Result<AuthTokenDto>> RefreshTokenAsync(string token,
+        CancellationToken cancellationToken = default)
     {
         var dbRefreshToken = await refreshTokenRepository.GetByRefreshTokenAsync(token, cancellationToken);
         var clientIp = requestContextService.GetClientIp();
@@ -145,17 +161,19 @@ internal class AuthService(
         if (dbRefreshToken.IsRevoked)
         {
             await refreshTokenRepository
-                .RevokeAsync(dbRefreshToken.Id, RefreshTokenRevokeReason.ReuseDetected, clientIp, cancellationToken: cancellationToken);
-            
+                .RevokeAsync(dbRefreshToken.Id, RefreshTokenRevokeReason.ReuseDetected, clientIp,
+                    cancellationToken: cancellationToken);
+
             return Result.Failure<AuthTokenDto>([RefreshTokenErrors.Invalid]);
         }
 
         var roles = await userManager.GetRolesAsync(dbRefreshToken.User);
         var authToken = await jwtTokenGenerator.GenerateTokenAsync(dbRefreshToken.User, roles, cancellationToken);
-        
+
         await refreshTokenRepository
-            .RevokeAsync(dbRefreshToken.Id, RefreshTokenRevokeReason.TokenRotated, clientIp,authToken.RefreshTokenId, cancellationToken);
-        
+            .RevokeAsync(dbRefreshToken.Id, RefreshTokenRevokeReason.TokenRotated, clientIp, authToken.RefreshTokenId,
+                cancellationToken);
+
         return Result.Success(authToken);
     }
 
@@ -168,12 +186,26 @@ internal class AuthService(
         {
             return Result.Failure([RefreshTokenErrors.Invalid]);
         }
-        
-        await refreshTokenRepository.RevokeAsync(dbRefreshToken.Id, 
+
+        await refreshTokenRepository.RevokeAsync(dbRefreshToken.Id,
             RefreshTokenRevokeReason.UserLoggedOut, clientIp, cancellationToken: cancellationToken);
-        
+
         return Result.Success();
     }
+    
+    
+    
+    
+    private async Task SendConfirmationEmailAsync(ApplicationUser user)
+    {
+        var token = await userManager.GenerateEmailConfirmationTokenAsync(user);
+        var callbackUrl =
+            $"{_frontendSettings.BaseUrl.TrimEnd('/')}{_frontendSettings.EmailConfirmationPath}?userId={Uri.EscapeDataString(user.Id.ToString())}&token={Uri.EscapeDataString(token)}";
+
+        await emailService.SendAsync(user.Email!, "Verify your email",
+            $"""Please verify your account by clicking : <a href="{callbackUrl}" target="_blank">here</a>""");
+    }
+
 }
 
 
@@ -220,34 +252,34 @@ You're building a domain-driven design (DDD) style system, where you're wrapping
 
 Best Practice: On login, revoke existing tokens and issue new ones
    Before issuing new tokens, revoke all active refresh tokens for the user.
-   
+
    Then generate a fresh refresh/access token pair for the new session.
-   
+
    This ensures:
-   
+
    Any previous device or session will no longer be able to use its refresh token to get new access tokens.
-   
+
    Only the most recent login is allowed to stay active.
 
 
 
 🧠 What to Revoke?
    You should revoke:
-   
+
    All refresh tokens where:
-   
+
    UserId == current user
-   
+
    IsRevoked == false
-   
-   
-   
+
+
+
 public async Task RevokeAllActiveTokensAsync(Guid userId, string ip, string reason, CancellationToken cancellationToken = default)
    {
        var activeTokens = await db.RefreshTokens
            .Where(t => t.UserId == userId && !t.IsRevoked && t.ExpiresAt > DateTime.UtcNow)
            .ToListAsync(cancellationToken);
-   
+
        foreach (var token in activeTokens)
        {
            token.IsRevoked = true;
@@ -255,31 +287,31 @@ public async Task RevokeAllActiveTokensAsync(Guid userId, string ip, string reas
            token.RevokedByIp = ip;
            token.RevokedReason = reason;
        }
-   
+
        await db.SaveChangesAsync(cancellationToken);
    }
-   
-   
+
+
 During login
 
 await RevokeAllActiveTokensAsync(user.ID, ipAddress, "New Login", cancellationToken);
    var newRefreshToken = GenerateRefreshToken(...);
    // Save and return the new token
-         
+
 What's considered good enough in production?
    Most secure systems accept a short window of overlap, and do this:
-   
+
    Access token TTL is short, e.g., 5–10 minutes.
-   
+
    Refresh token is long-lived, but gets revoked on new login.
-   
+
    Rotate refresh tokens with each use (helps detect theft).
-   
-   
-   
-   
+
+
+
+
 *** Use iat (issued-at) in access tokens, and store lastLoginAt per user:
-   
+
             You can reject tokens issued before lastLoginAt if you want to be more aggressive.
 
 At login :
@@ -292,18 +324,23 @@ var tokenIssuedAt = jwtPayload.iat; // Unix timestamp
    {
        reject("Token issued before last login.");
    }
-   
-Now you can instantly expire all old tokens — but at the cost of a DB call on each request.         
-   
+
+Now you can instantly expire all old tokens — but at the cost of a DB call on each request.
+
 
 
 
 ## for logout
 *** I should blacklist jwt in memory for. time it is valid for like 15 minutes. but then it would require me
  to write custom middleware to check if jwt is blacklisted for every request. which then is kinda of bad.
- 
- and if we are having to do all these then maybe we should consider moving from jwt to cookie based application 
+
+ and if we are having to do all these then maybe we should consider moving from jwt to cookie based application
  and drop idea of api to begin with I think
+
+I will allow multiple device logins. so I won't revoke all the tokens during login or logout.
+only remove the one that user have but how will i know which one the user have ?
+well I will send the refresh token for logout and revoke It. hence successful logout. else if token is already
+revoked return bad request.
 
 
  */

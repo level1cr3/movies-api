@@ -49,6 +49,19 @@ public class AuthController(IAuthService authService) : ControllerBase
     }
 
     
+    [HttpPost(AuthEndpoints.ResendConfirmEmail)]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    public async Task<IActionResult> ResendConfirmEmail([FromBody] ResendConfirmationEmailRequest request, CancellationToken cancellationToken)
+    {
+        // add rate limiting via rate limiter and also add the captcha. for captcha create separate endpoint
+        // don't send captcha value with every object.
+        
+        await authService.ResendConfirmEmailAsync(request.Email, cancellationToken);
+        return Ok();
+    }
+
+    
+    
     [HttpPost(AuthEndpoints.Login)]
     [ProducesResponseType<TokenResponse>(StatusCodes.Status200OK)]
     [ProducesResponseType<AppProblemDetails>(StatusCodes.Status400BadRequest)]
