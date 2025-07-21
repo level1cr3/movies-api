@@ -3,7 +3,6 @@ using System.Security.Claims;
 using System.Security.Cryptography;
 using System.Text;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
@@ -26,7 +25,7 @@ internal class JwtTokenGenerator(
 {
     private readonly JwtSettings _jwtSettings = options.Value;
 
-    public async Task<AuthTokenDto> GenerateTokenAsync(ApplicationUser user, IEnumerable<string> roles)
+    public async Task<AuthTokenDto> GenerateTokenAsync(ApplicationUser user, IEnumerable<string> roles, CancellationToken cancellationToken = default)
     {
         List<Claim> claims =
         [
@@ -35,7 +34,7 @@ internal class JwtTokenGenerator(
             new(JwtRegisteredClaimNames.Email, user.Email!),
             new(JwtRegisteredClaimNames.EmailVerified, user.EmailConfirmed.ToString()),
             new(JwtRegisteredClaimNames.Name, $"{user.FirstName} {user.LastName}"),
-            // new(JwtRegisteredClaimNames.Picture, "profile picutre url"), // maybe later to show users profile picutre
+            // new(JwtRegisteredClaimNames.Picture, "profile picture url"), // maybe later to show users profile picture
         ];
 
         claims.AddRange(roles.Select(role => new Claim(ClaimTypes.Role, role)));
@@ -59,7 +58,7 @@ internal class JwtTokenGenerator(
         var token = tokenHandler.CreateToken(tokenDescriptor);
         var jwt = tokenHandler.WriteToken(token);
 
-        var (refreshToken, refreshTokenId) = await GenerateRefreshTokenAsync(user.Id);
+        var (refreshToken, refreshTokenId) = await GenerateRefreshTokenAsync(user.Id, cancellationToken);
         
         var authTokenDto = new AuthTokenDto
         {
@@ -73,7 +72,7 @@ internal class JwtTokenGenerator(
         return authTokenDto;
     }
 
-    private async Task<(string refreshToken, Guid refreshTokenId)> GenerateRefreshTokenAsync(Guid userId)
+    private async Task<(string refreshToken, Guid refreshTokenId)> GenerateRefreshTokenAsync(Guid userId, CancellationToken cancellationToken = default)
     {
          var token= Convert.ToBase64String(RandomNumberGenerator.GetBytes(32));
          var now = DateTime.UtcNow;
@@ -88,7 +87,7 @@ internal class JwtTokenGenerator(
          };
          
          refreshTokenRepository.Create(refreshToken);
-         var rowsAffected = await unitOfWork.SaveChangesAsync();
+         var rowsAffected = await unitOfWork.SaveChangesAsync(cancellationToken);
 
          if (rowsAffected < 1)
          {

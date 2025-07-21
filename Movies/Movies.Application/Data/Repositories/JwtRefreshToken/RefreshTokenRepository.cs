@@ -19,7 +19,7 @@ internal class RefreshTokenRepository(ApplicationDbContext db) : IRefreshTokenRe
     public void Create(RefreshToken refreshToken)
     {
         db.RefreshTokens.Add(refreshToken);
-        // don't add db.savechanges() here. read below as to why ?
+        // don't add db.SaveChanges() here. read below as to why ?
     }
     
     public async Task RevokeAsync(Guid id, string revokeReason, string revokeByIp, Guid? replaceByTokenId = null, CancellationToken cancellationToken = default)

@@ -33,8 +33,8 @@ public class MoviesController(IMovieService movieService) : ControllerBase
     [ProducesResponseType<AppProblemDetails>(StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> Create([FromBody] CreateMovieRequest request, CancellationToken cancellationToken)
     {
-        var command = request.ToCreateMovieDto();
-        var result = await movieService.CreateAsync(command, cancellationToken);
+        var createMovieDto = request.ToCreateMovieDto();
+        var result = await movieService.CreateAsync(createMovieDto, cancellationToken);
 
         if (result.IsFailure)
         {

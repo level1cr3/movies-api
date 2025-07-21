@@ -5,5 +5,5 @@ namespace Movies.Application.Features.Auth.Services;
 
 internal interface IJwtTokenGenerator
 {
-     Task<AuthTokenDto> GenerateTokenAsync(ApplicationUser user, IEnumerable<string> roles);
+     Task<AuthTokenDto> GenerateTokenAsync(ApplicationUser user, IEnumerable<string> roles, CancellationToken cancellationToken = default);
 }

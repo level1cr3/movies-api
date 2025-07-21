@@ -18,10 +18,10 @@ public class AuthController(IAuthService authService) : ControllerBase
     [ProducesResponseType(StatusCodes.Status201Created)]
     [ProducesResponseType<AppProblemDetails>(StatusCodes.Status400BadRequest)]
 
-    public async Task<IActionResult> Register(RegisterRequest request)
+    public async Task<IActionResult> Register(RegisterRequest request, CancellationToken cancellationToken)
     {
         var registerDto = request.ToRegisterDto();
-        var result = await authService.RegisterAsync(registerDto);
+        var result = await authService.RegisterAsync(registerDto, cancellationToken);
 
         if (result.IsFailure)
         {
@@ -88,7 +88,7 @@ public class AuthController(IAuthService authService) : ControllerBase
     }
 
     
-    // finsh the refresh token thing and then pass cancellation token where the could be used.
+    
     // build logout functionality
     
     
@@ -125,16 +125,14 @@ public class AuthController(IAuthService authService) : ControllerBase
     [HttpGet("auth-test")]
     public IActionResult Method()
     {
-        var user = User;
-        return Ok();
+        return Ok(User);
     }
     
     [Authorize(Roles = Role.Admin)]
     [HttpGet("admin-test")]
     public IActionResult Method2()
     {
-        var user = User;
-        return Ok();
+        return Ok(User);
     }
 
     

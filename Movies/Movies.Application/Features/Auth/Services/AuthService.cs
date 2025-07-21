@@ -3,7 +3,6 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Options;
 using Movies.Application.Data;
 using Movies.Application.Data.Entities;
-using Movies.Application.Data.Repositories;
 using Movies.Application.Data.Repositories.JwtRefreshToken;
 using Movies.Application.Email;
 using Movies.Application.Features.Auth.Constants;
@@ -24,14 +23,13 @@ internal class AuthService(
     SignInManager<ApplicationUser> signInManager,
     IJwtTokenGenerator jwtTokenGenerator,
     IRefreshTokenRepository refreshTokenRepository,
-    IRequestContextService requestContextService,
-    IUnitOfWork unitOfWork) : IAuthService
+    IRequestContextService requestContextService) : IAuthService
 {
     private readonly FrontendSettings _frontendSettings = optionsFrontend.Value;
 
-    public async Task<Result> RegisterAsync(RegisterDto register)
+    public async Task<Result> RegisterAsync(RegisterDto register, CancellationToken cancellationToken = default)
     {
-        var validationResult = await registerValidator.ValidateAsync(register);
+        var validationResult = await registerValidator.ValidateAsync(register, cancellationToken);
 
         if (!validationResult.IsValid)
         {
@@ -39,7 +37,7 @@ internal class AuthService(
         }
 
 
-        await using var transaction = await db.Database.BeginTransactionAsync();
+        await using var transaction = await db.Database.BeginTransactionAsync(cancellationToken);
 
         try
         {
@@ -73,18 +71,18 @@ internal class AuthService(
             await emailService.SendAsync(user.Email, "Verify your email",
                 $"""Please verify your account by clicking : <a href="{callbackUrl}" target="_blank">here</a>""");
 
-            await transaction.CommitAsync();
+            await transaction.CommitAsync(cancellationToken);
 
             return Result.Success();
         }
-        catch (Exception e)
+        catch (Exception)
         {
-            await transaction.RollbackAsync();
+            await transaction.RollbackAsync(cancellationToken);
             throw;
         }
     }
 
-    public async Task<Result> ConfirmEmailAsync(string userId, string token)
+    public async Task<Result> ConfirmEmailAsync(string userId, string token, CancellationToken cancellationToken = default)
     {
         var user = await userManager.FindByIdAsync(userId);
 
@@ -103,7 +101,7 @@ internal class AuthService(
         return result.Succeeded ? Result.Success() : Result.Failure(result.Errors.ToAppErrors());
     }
 
-    public async Task<Result<AuthTokenDto>> LoginAsync(string email, string password)
+    public async Task<Result<AuthTokenDto>> LoginAsync(string email, string password, CancellationToken cancellationToken = default)
     {
         var user = await userManager.FindByEmailAsync(email);
 
@@ -130,13 +128,13 @@ internal class AuthService(
             return Result.Failure<AuthTokenDto>([LoginErrors.Invalid]);
         }
 
-        var authTokenDto = await jwtTokenGenerator.GenerateTokenAsync(user, roles);
+        var authTokenDto = await jwtTokenGenerator.GenerateTokenAsync(user, roles, cancellationToken);
         return Result.Success(authTokenDto);
     }
 
-    public async Task<Result<AuthTokenDto>> RefreshTokenAsync(string token)
+    public async Task<Result<AuthTokenDto>> RefreshTokenAsync(string token, CancellationToken cancellationToken = default)
     {
-        var dbRefreshToken = await refreshTokenRepository.GetByRefreshTokenAsync(token);
+        var dbRefreshToken = await refreshTokenRepository.GetByRefreshTokenAsync(token, cancellationToken);
         var clientIp = requestContextService.GetClientIp();
 
         if (dbRefreshToken is null)
@@ -147,16 +145,16 @@ internal class AuthService(
         if (dbRefreshToken.IsRevoked)
         {
             await refreshTokenRepository
-                .RevokeAsync(dbRefreshToken.Id, RefreshTokenRevokeReason.ReuseDetected, clientIp);
+                .RevokeAsync(dbRefreshToken.Id, RefreshTokenRevokeReason.ReuseDetected, clientIp, cancellationToken: cancellationToken);
             
             return Result.Failure<AuthTokenDto>([RefreshTokenErrors.Invalid]);
         }
 
         var roles = await userManager.GetRolesAsync(dbRefreshToken.User);
-        var authToken = await jwtTokenGenerator.GenerateTokenAsync(dbRefreshToken.User, roles);
+        var authToken = await jwtTokenGenerator.GenerateTokenAsync(dbRefreshToken.User, roles, cancellationToken);
         
         await refreshTokenRepository
-            .RevokeAsync(dbRefreshToken.Id, RefreshTokenRevokeReason.TokenRotated, clientIp,authToken.RefreshTokenId);
+            .RevokeAsync(dbRefreshToken.Id, RefreshTokenRevokeReason.TokenRotated, clientIp,authToken.RefreshTokenId, cancellationToken);
         
         return Result.Success(authToken);
     }
@@ -164,7 +162,7 @@ internal class AuthService(
 
 
 /*
- # Why i don't have repository wrapping user manager,signing manager and role manager.
+ # Why I don't have repository wrapping user manager,signing manager and role manager.
 
  🔄 Identity Is the Exception
     ASP.NET Identity (via UserManager, RoleManager, SignInManager) already encapsulates the
@@ -181,7 +179,7 @@ internal class AuthService(
     They bypass your Unit of Work flow.
     That’s why you need explicit transaction control (like you’re doing with BeginTransactionAsync()).
 
-But this is rare case i just want it to have it here.
+But this is rare case I just want it to have it here.
 
 ### Because it will never happen because roles would have been seeded before only via migrations.
 
@@ -194,7 +192,7 @@ You might do that only if:
 
 You want to decouple your service from ASP.NET Identity to make it easier to swap out in the future.
 
-You need to add custom query methods that UserManager doesn’t provide.
+You need to add custom query methods that UserManager does not provide.
 
 You are implementing unit tests and want to mock a simpler abstraction.
 
@@ -248,7 +246,7 @@ public async Task RevokeAllActiveTokensAsync(Guid userId, string ip, string reas
    
 During login
 
-await RevokeAllActiveTokensAsync(user.Id, ipAddress, "New Login", cancellationToken);
+await RevokeAllActiveTokensAsync(user.ID, ipAddress, "New Login", cancellationToken);
    var newRefreshToken = GenerateRefreshToken(...);
    // Save and return the new token
          
@@ -285,11 +283,11 @@ Now you can instantly expire all old tokens — but at the cost of a DB call on 
 
 
 ## for logout
-*** i should blacklist jwt in memory for. time it is valid for like 15 minutes. but then it would require me
+*** I should blacklist jwt in memory for. time it is valid for like 15 minutes. but then it would require me
  to write custom middleware to check if jwt is blacklisted for every request. which then is kinda of bad.
  
  and if we are having to do all these then maybe we should consider moving from jwt to cookie based application 
- and drop idea of api to begin with i think
+ and drop idea of api to begin with I think
 
 
  */
