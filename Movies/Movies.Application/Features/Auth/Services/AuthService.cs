@@ -158,6 +158,22 @@ internal class AuthService(
         
         return Result.Success(authToken);
     }
+
+    public async Task<Result> LogoutAsync(string token, CancellationToken cancellationToken = default)
+    {
+        var dbRefreshToken = await refreshTokenRepository.GetByRefreshTokenAsync(token, cancellationToken);
+        var clientIp = requestContextService.GetClientIp();
+
+        if (dbRefreshToken is null || dbRefreshToken.IsRevoked)
+        {
+            return Result.Failure([RefreshTokenErrors.Invalid]);
+        }
+        
+        await refreshTokenRepository.RevokeAsync(dbRefreshToken.Id, 
+            RefreshTokenRevokeReason.UserLoggedOut, clientIp, cancellationToken: cancellationToken);
+        
+        return Result.Success();
+    }
 }
 
 

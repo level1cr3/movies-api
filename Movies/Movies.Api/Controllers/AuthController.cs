@@ -17,7 +17,6 @@ public class AuthController(IAuthService authService) : ControllerBase
     [HttpPost(AuthEndpoints.Register)]
     [ProducesResponseType(StatusCodes.Status201Created)]
     [ProducesResponseType<AppProblemDetails>(StatusCodes.Status400BadRequest)]
-
     public async Task<IActionResult> Register(RegisterRequest request, CancellationToken cancellationToken)
     {
         var registerDto = request.ToRegisterDto();
@@ -33,13 +32,12 @@ public class AuthController(IAuthService authService) : ControllerBase
     }
     
     
-
     [HttpPost(AuthEndpoints.ConfirmEmail)]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType<AppProblemDetails>(StatusCodes.Status400BadRequest)]
-    public async Task<IActionResult> ConfirmEmail([FromBody] ConfirmEmailRequest request)
+    public async Task<IActionResult> ConfirmEmail([FromBody] ConfirmEmailRequest request, CancellationToken cancellationToken)
     {
-        var result = await authService.ConfirmEmailAsync(request.UserId, request.Token);
+        var result = await authService.ConfirmEmailAsync(request.UserId, request.Token, cancellationToken);
 
         if (result.IsFailure)
         {
@@ -50,14 +48,13 @@ public class AuthController(IAuthService authService) : ControllerBase
         return Ok();
     }
 
-
-
+    
     [HttpPost(AuthEndpoints.Login)]
     [ProducesResponseType<TokenResponse>(StatusCodes.Status200OK)]
     [ProducesResponseType<AppProblemDetails>(StatusCodes.Status400BadRequest)]
-    public async Task<IActionResult> Login([FromBody] LoginRequest request)
+    public async Task<IActionResult> Login([FromBody] LoginRequest request, CancellationToken cancellationToken)
     {
-        var result = await authService.LoginAsync(request.Email, request.Password);
+        var result = await authService.LoginAsync(request.Email, request.Password, cancellationToken);
 
         if (result.IsFailure)
         {
@@ -73,9 +70,9 @@ public class AuthController(IAuthService authService) : ControllerBase
     [HttpPost(AuthEndpoints.RefreshToken)]
     [ProducesResponseType<TokenResponse>(StatusCodes.Status200OK)]
     [ProducesResponseType<AppProblemDetails>(StatusCodes.Status400BadRequest)]
-    public async Task<IActionResult> RefreshToken([FromBody] RefreshTokenRequest request)
+    public async Task<IActionResult> RefreshToken([FromBody] RefreshTokenRequest request, CancellationToken cancellationToken)
     {
-        var result = await authService.RefreshTokenAsync(request.Token);
+        var result = await authService.RefreshTokenAsync(request.Token, cancellationToken);
         
         if (result.IsFailure)
         {
@@ -87,9 +84,27 @@ public class AuthController(IAuthService authService) : ControllerBase
         return Ok(tokenResponse);
     }
 
+
+    [Authorize]
+    [HttpPost(AuthEndpoints.Logout)]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType<AppProblemDetails>(StatusCodes.Status400BadRequest)]
+    public async Task<IActionResult> Logout([FromBody] LogoutRequest request, CancellationToken cancellationToken)
+    {
+        var result = await authService.LogoutAsync(request.RefreshToken,cancellationToken);
+
+        if (result.IsFailure)
+        {
+            var appProblemDetails = result.AppErrors.ToAppProblemDetails(HttpContext);
+            return BadRequest(appProblemDetails);
+        }
+
+        return Ok();
+    }
+
+
+
     
-    
-    // build logout functionality
     
     
     

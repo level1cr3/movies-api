@@ -11,6 +11,25 @@ public static class AuthEndpoints
     public const string Login = $"{Base}/login";
     
     public const string RefreshToken = $"{Base}/refresh-token";
+    
+    public const string Logout = $"{Base}/logout";
+
+    
+    // TODO
+    // resend confirmation email.
+    // forgot password.
+    // reset password.
+    
+    
+    // I will allow multiple device logins. so I won't revoke all the tokens during login or logout.
+    // only remove the one that user have but how will i know which one the user have ?
+    // well I will send the refresh token for logout and revoke It. hence successful logout. else if token is already
+    // revoked return bad request. 
+    
+    
+    // TODO later
+    // maybe later 2factor auth. using TOTP.
+    // OAuth or external login.
 }
 
 
