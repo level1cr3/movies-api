@@ -79,6 +79,9 @@ internal class AuthService(
     public async Task<Result> ConfirmEmailAsync(string userId, string token,
         CancellationToken cancellationToken = default)
     {
+        userId = Uri.UnescapeDataString(userId);
+        token = Uri.UnescapeDataString(token);
+        
         var user = await userManager.FindByIdAsync(userId);
 
         if (user is null)
@@ -195,7 +198,7 @@ internal class AuthService(
     
     
     
-    
+    // Need to implement outbox pattern for email sending.
     private async Task SendConfirmationEmailAsync(ApplicationUser user)
     {
         var token = await userManager.GenerateEmailConfirmationTokenAsync(user);
