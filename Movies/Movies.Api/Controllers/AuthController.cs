@@ -115,7 +115,19 @@ public class AuthController(IAuthService authService) : ControllerBase
         return Ok();
     }
 
-
+    
+    
+    // TODO : Forgot password
+    
+    
+    
+    
+    // TODO : Reset password
+    // TODO : Change Email
+    // TODO : 2 factor auth
+    // TODO : OAuth
+    
+    
 
     
     
