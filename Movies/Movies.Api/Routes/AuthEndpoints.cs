@@ -17,14 +17,13 @@ public static class AuthEndpoints
     public const string Logout = $"{Base}/logout";
 
     public const string ForgotPassword = $"{Base}/forgot-password";
+    
+    public const string ResetPassword = $"{Base}/reset-password";
 
-    // TODO
-    // resend confirmation email.
-    // forgot password.
-    // reset password.
-
+    
     // TODO later
-    // maybe later 2factor auth. using TOTP.
+    // change email
+    // maybe later 2factor auth. using TOTP. and backup codes.
     // OAuth or external login.
 }
 

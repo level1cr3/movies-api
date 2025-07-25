@@ -62,7 +62,7 @@ internal class AuthService(
             {
                 return Result.Failure(roleResult.Errors.ToAppErrors());
             }
-            
+
             await SendConfirmationEmailAsync(user);
 
             await transaction.CommitAsync(cancellationToken);
@@ -81,7 +81,7 @@ internal class AuthService(
     {
         userId = Uri.UnescapeDataString(userId);
         token = Uri.UnescapeDataString(token);
-        
+
         var user = await userManager.FindByIdAsync(userId);
 
         if (user is null)
@@ -94,9 +94,11 @@ internal class AuthService(
             return Result.Success();
         }
 
-        var result = await userManager.ConfirmEmailAsync(user, token);
+        var confirmEmailResult = await userManager.ConfirmEmailAsync(user, token);
 
-        return result.Succeeded ? Result.Success() : Result.Failure(result.Errors.ToAppErrors());
+        return confirmEmailResult.Succeeded
+            ? Result.Success()
+            : Result.Failure(confirmEmailResult.Errors.ToAppErrors());
     }
 
     public async Task<Result> ResendConfirmEmailAsync(string email, CancellationToken cancellationToken = default)
@@ -113,7 +115,7 @@ internal class AuthService(
         {
             return Result.Success(); // return success to prevent user enumeration error.
         }
-        
+
         await SendConfirmationEmailAsync(user);
         return Result.Success();
     }
@@ -195,9 +197,45 @@ internal class AuthService(
 
         return Result.Success();
     }
-    
-    
-    
+
+    public async Task<Result> ForgotPasswordAsync(string email, CancellationToken cancellationToken = default)
+    {
+        var user = await userManager.FindByEmailAsync(email);
+
+        if (user is not null && user.EmailConfirmed)
+        {
+            var token = await userManager.GeneratePasswordResetTokenAsync(user);
+            var callbackUrl =
+                $"{_frontendSettings.BaseUrl.TrimEnd('/')}{_frontendSettings.ResetPasswordPath}?userId={Uri.EscapeDataString(user.Id.ToString())}&token={Uri.EscapeDataString(token)}";
+
+            await emailService.SendAsync(user.Email!, "Reset password",
+                $"""Please reset your password by clicking : <a href="{callbackUrl}" target="_blank">here</a>""");
+        }
+
+        return Result.Success();
+    }
+
+    public async Task<Result> ResetPasswordAsync(string userId, string token, string newPassword,
+        CancellationToken cancellationToken = default)
+    {
+        userId = Uri.UnescapeDataString(userId);
+        token = Uri.UnescapeDataString(token);
+
+        var user = await userManager.FindByIdAsync(userId);
+
+        if (user is null || !user.EmailConfirmed)
+        {
+            return Result.Failure([ResetPasswordTokenError.Invalid]);
+        }
+
+        var resetPasswordResult = await userManager.ResetPasswordAsync(user, token, newPassword);
+        
+        return resetPasswordResult.Succeeded
+            ? Result.Success()
+            : Result.Failure(resetPasswordResult.Errors.ToAppErrors());
+    }
+
+
     // Need to implement outbox pattern for email sending.
     private async Task SendConfirmationEmailAsync(ApplicationUser user)
     {
@@ -208,7 +246,6 @@ internal class AuthService(
         await emailService.SendAsync(user.Email!, "Verify your email",
             $"""Please verify your account by clicking : <a href="{callbackUrl}" target="_blank">here</a>""");
     }
-
 }
 
 

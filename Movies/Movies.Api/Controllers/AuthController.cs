@@ -58,6 +58,8 @@ public class AuthController(IAuthService authService) : ControllerBase
         
         await authService.ResendConfirmEmailAsync(request.Email, cancellationToken);
         return Ok();
+        
+        // no bad request etc to prevent user enumeration attacks
     }
 
     
@@ -116,13 +118,36 @@ public class AuthController(IAuthService authService) : ControllerBase
     }
 
     
+    [HttpPost(AuthEndpoints.ForgotPassword)]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    public async Task<IActionResult> ForgotPassword([FromBody] ForgotPasswordRequest request, CancellationToken cancellationToken)
+    {
+        await authService.ForgotPasswordAsync(request.Email, cancellationToken);
+        return Ok(); // no bad request etc to prevent user enumeration attacks
+    }
+
+
+
+    [HttpPost(AuthEndpoints.ResetPassword)]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType<AppProblemDetails>(StatusCodes.Status400BadRequest)]
+    public async Task<IActionResult> ResetPassword([FromBody] ResetPasswordRequest request, CancellationToken cancellationToken)
+    {
+        var result = await authService.ResetPasswordAsync(request.UserId,request.Token,request.NewPassword,cancellationToken);
+
+        if (result.IsFailure)
+        {
+            var appProblemDetails = result.AppErrors.ToAppProblemDetails(HttpContext);
+            return BadRequest(appProblemDetails);
+        }
+        
+        return Ok();
+    }
     
-    // TODO : Forgot password
     
     
     
-    
-    // TODO : Reset password
+    // Todo later
     // TODO : Change Email
     // TODO : 2 factor auth
     // TODO : OAuth
