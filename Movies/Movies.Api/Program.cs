@@ -1,9 +1,11 @@
+using Microsoft.Net.Http.Headers;
 using Movies.Api.Middleware;
 using Movies.Api.OpenApi.Transformers;
 using Movies.Application;
 using Movies.Application.Data.Seeder;
 using Scalar.AspNetCore;
 using Serilog;
+using Microsoft.IdentityModel.Protocols.Configuration;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -22,7 +24,15 @@ builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
 builder.Host.UseSerilog((context, configuration) => 
     configuration.ReadFrom.Configuration(context.Configuration));
 
-// builder.Services.Configure<>()
+var allowedOrigins=builder.Configuration.GetSection("AllowedOrigins").Get<string[]>() 
+                   ?? throw new InvalidConfigurationException("Allowed origins is not configured");
+
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowReactApp", policy => policy.WithOrigins(allowedOrigins)
+        .WithHeaders(HeaderNames.ContentType, HeaderNames.Authorization, HeaderNames.Accept)
+        .WithMethods(HttpMethods.Get, HttpMethods.Post, HttpMethods.Put, HttpMethods.Delete));
+});
 
 var app = builder.Build();
 
@@ -42,10 +52,10 @@ await seeder.SeedAsync();
  
  */
 
-
 app.UseExceptionHandler();
 app.UseSerilogRequestLogging();
 app.UseHttpsRedirection();
+app.UseCors("AllowReactApp");
 
 if (app.Environment.IsDevelopment())
 {

@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.IdentityModel.Protocols.Configuration;
 using Microsoft.IdentityModel.Tokens;
 using Movies.Application.Data;
 using Movies.Application.Data.Entities;
@@ -38,7 +39,7 @@ public static class DependencyInjection
     private static void AddPersistence(IServiceCollection services, IConfiguration configuration)
     {
         var dbConnection = configuration.GetConnectionString("Database") ??
-                           throw new InvalidOperationException("connection string not found.");
+                           throw new InvalidConfigurationException("connection string not found.");
 
         services.AddDbContext<ApplicationDbContext>(options =>
             options.UseNpgsql(dbConnection).UseSnakeCaseNamingConvention());
@@ -66,7 +67,7 @@ public static class DependencyInjection
         services.AddScoped<IJwtTokenGenerator, JwtTokenGenerator>();
 
         var jwtSettings = configuration.GetSection("Jwt").Get<JwtSettings>()
-                          ?? throw new InvalidOperationException("Jwt configuration is not available.");
+                          ?? throw new InvalidConfigurationException("Jwt configuration is not available.");
 
         services.AddAuthentication(option =>
         {
