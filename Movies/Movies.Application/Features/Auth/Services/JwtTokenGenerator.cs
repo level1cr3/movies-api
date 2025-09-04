@@ -19,8 +19,7 @@ internal class JwtTokenGenerator(
     IOptions<JwtSettings> options,
     IRefreshTokenRepository refreshTokenRepository,
     IUnitOfWork unitOfWork,
-    IRequestContextService requestContextService,
-    ILogger<JwtTokenGenerator> logger)
+    IRequestContextService requestContextService)
     : IJwtTokenGenerator
 {
     private readonly JwtSettings _jwtSettings = options.Value;
@@ -58,7 +57,7 @@ internal class JwtTokenGenerator(
         var token = tokenHandler.CreateToken(tokenDescriptor);
         var jwt = tokenHandler.WriteToken(token);
 
-        var (refreshToken, refreshTokenId) = await GenerateRefreshTokenAsync(user.Id, cancellationToken);
+        var (refreshToken, refreshTokenId, refreshTokenExpiresAt) = await GenerateRefreshTokenAsync(user.Id, cancellationToken);
         
         var authTokenDto = new AuthTokenDto
         {
@@ -66,13 +65,14 @@ internal class JwtTokenGenerator(
             ExpiresIn = (int)(expires - now).TotalSeconds,
             TokenType = JwtBearerDefaults.AuthenticationScheme,
             RefreshToken = refreshToken,
+            RefreshTokenExpiresAt = refreshTokenExpiresAt,
             RefreshTokenId = refreshTokenId
         };
 
         return authTokenDto;
     }
 
-    private async Task<(string refreshToken, Guid refreshTokenId)> GenerateRefreshTokenAsync(Guid userId, CancellationToken cancellationToken = default)
+    private async Task<(string refreshToken, Guid refreshTokenId, DateTime refreshTokenExpiresAt)> GenerateRefreshTokenAsync(Guid userId, CancellationToken cancellationToken = default)
     {
          var token= Convert.ToBase64String(RandomNumberGenerator.GetBytes(32));
          var now = DateTime.UtcNow;
@@ -87,15 +87,9 @@ internal class JwtTokenGenerator(
          };
          
          refreshTokenRepository.Create(refreshToken);
-         var rowsAffected = await unitOfWork.SaveChangesAsync(cancellationToken);
+         await unitOfWork.SaveChangesAsync(cancellationToken);
 
-         if (rowsAffected < 1)
-         {
-             logger.LogError("Failed to save refresh token for user {UserId}", userId);
-             return (string.Empty, Guid.Empty);
-         }
-         
-         return (token, refreshToken.Id);
+         return (token, refreshToken.Id, refreshToken.ExpiresAt);
          
          // Note : If the return ever grows, refactor to an object easily.
          // For now: Stick with the tuple!

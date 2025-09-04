@@ -76,7 +76,21 @@ public class AuthController(IAuthService authService) : ControllerBase
             var appProblemDetails = result.AppErrors.ToAppProblemDetails(HttpContext);
             return BadRequest(appProblemDetails);
         }
-
+        
+        Response.Cookies.Append("refreshToken",result.Value.RefreshToken,new CookieOptions
+        {
+            HttpOnly = true,        // 👈 not accessible by JS
+            Secure = true,
+            SameSite = SameSiteMode.None, // 👈 required if frontend & backend are on different domains
+            Expires = result.Value.RefreshTokenExpiresAt, 
+            Path = AuthEndpoints.RefreshToken, // 👈 restrict to refresh endpoint
+            // Domain = ".example.com" // 👈 if using subdomains like app.example.com + api.example.com // It controls which hostnames can receive the cookie.
+            // if domains are different don't set domain
+        });
+        
+        // refresh token in JSON is only for non-browser clients. For browsers (mobile or desktop), always use HttpOnly cookie.
+        
+        
         var tokenResponse = result.Value.ToTokenResponse();
         return Ok(tokenResponse);
     }
@@ -84,16 +98,29 @@ public class AuthController(IAuthService authService) : ControllerBase
     
     [HttpPost(AuthEndpoints.RefreshToken)]
     [ProducesResponseType<TokenResponse>(StatusCodes.Status200OK)]
-    [ProducesResponseType<AppProblemDetails>(StatusCodes.Status400BadRequest)]
-    public async Task<IActionResult> RefreshToken([FromBody] RefreshTokenRequest request, CancellationToken cancellationToken)
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    public async Task<IActionResult> RefreshToken(CancellationToken cancellationToken)
     {
-        var result = await authService.RefreshTokenAsync(request.Token, cancellationToken);
+        if (!Request.Cookies.TryGetValue("refreshToken", out var refreshToken))
+        {
+            return Unauthorized();
+        }
+        
+        var result = await authService.RefreshTokenAsync(refreshToken, cancellationToken);
         
         if (result.IsFailure)
         {
-            var appProblemDetails = result.AppErrors.ToAppProblemDetails(HttpContext);
-            return BadRequest(appProblemDetails);
+            return Unauthorized();
         }
+        
+        Response.Cookies.Append("refreshToken",result.Value.RefreshToken,new CookieOptions
+        {
+            HttpOnly = true,        // 👈 not accessible by JS
+            Secure = true,
+            SameSite = SameSiteMode.None, // 👈 required if frontend & backend are on different domains
+            Expires = result.Value.RefreshTokenExpiresAt, 
+            Path = AuthEndpoints.RefreshToken, // 👈 restrict to refresh endpoint
+        });
         
         var tokenResponse = result.Value.ToTokenResponse();
         return Ok(tokenResponse);

@@ -24,8 +24,7 @@ public static class AuthMapping
         {
             AccessToken = tokenDto.AccessToken,
             ExpiresIn = tokenDto.ExpiresIn,
-            TokenType = tokenDto.TokenType,
-            RefreshToken = tokenDto.RefreshToken
+            TokenType = tokenDto.TokenType
         };
     }
 }

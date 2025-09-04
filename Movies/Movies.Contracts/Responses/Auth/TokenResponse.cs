@@ -8,5 +8,4 @@ public sealed record TokenResponse
     
     public required string TokenType { get; init; }
     
-    public required string RefreshToken { get; init; }
 }

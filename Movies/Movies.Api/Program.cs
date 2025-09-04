@@ -31,7 +31,9 @@ builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowReactApp", policy => policy.WithOrigins(allowedOrigins)
         .WithHeaders(HeaderNames.ContentType, HeaderNames.Authorization, HeaderNames.Accept)
-        .WithMethods(HttpMethods.Get, HttpMethods.Post, HttpMethods.Put, HttpMethods.Delete));
+        .WithMethods(HttpMethods.Get, HttpMethods.Post, HttpMethods.Put, HttpMethods.Delete)
+        .AllowCredentials() // this is done for refresh token. It will be stored in browser cookie with httpOnly true. 
+    );
 });
 
 var app = builder.Build();
