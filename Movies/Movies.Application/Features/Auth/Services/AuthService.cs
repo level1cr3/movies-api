@@ -120,14 +120,14 @@ internal class AuthService(
         return Result.Success();
     }
 
-    public async Task<Result<AuthTokenDto>> LoginAsync(string email, string password,
+    public async Task<Result<LoginDto>> LoginAsync(string email, string password,
         CancellationToken cancellationToken = default)
     {
         var user = await userManager.FindByEmailAsync(email);
 
         if (user is null)
         {
-            return Result.Failure<AuthTokenDto>([LoginErrors.Invalid]);
+            return Result.Failure<LoginDto>([LoginErrors.Invalid]);
         }
 
         var roles = await userManager.GetRolesAsync(user);
@@ -137,19 +137,21 @@ internal class AuthService(
         {
             if (signInResult.IsNotAllowed)
             {
-                return Result.Failure<AuthTokenDto>([LoginErrors.NotAllowed]);
+                return Result.Failure<LoginDto>([LoginErrors.NotAllowed]);
             }
 
             if (signInResult.IsLockedOut)
             {
-                return Result.Failure<AuthTokenDto>([LoginErrors.LockedOut]);
+                return Result.Failure<LoginDto>([LoginErrors.LockedOut]);
             }
 
-            return Result.Failure<AuthTokenDto>([LoginErrors.Invalid]);
+            return Result.Failure<LoginDto>([LoginErrors.Invalid]);
         }
 
         var authTokenDto = await jwtTokenGenerator.GenerateTokenAsync(user, roles, cancellationToken);
-        return Result.Success(authTokenDto);
+        var userDto = new UserDto($"{user.FirstName} {user.LastName}", user.Email!, roles.ToList());
+        var loginDto = new LoginDto(authTokenDto,userDto);
+        return Result.Success(loginDto);
     }
 
     public async Task<Result<AuthTokenDto>> RefreshTokenAsync(string token,

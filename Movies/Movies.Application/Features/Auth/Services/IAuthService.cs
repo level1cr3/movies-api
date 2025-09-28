@@ -11,7 +11,7 @@ public interface IAuthService
     
     Task<Result> ResendConfirmEmailAsync(string email, CancellationToken cancellationToken = default);
 
-    Task<Result<AuthTokenDto>> LoginAsync(string email, string password, CancellationToken cancellationToken = default);
+    Task<Result<LoginDto>> LoginAsync(string email, string password, CancellationToken cancellationToken = default);
     
     Task<Result<AuthTokenDto>> RefreshTokenAsync(string token, CancellationToken cancellationToken = default);
 

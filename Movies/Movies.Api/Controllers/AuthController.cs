@@ -1,9 +1,13 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Options;
 using Movies.Api.Mappings;
 using Movies.Api.Routes;
+using Movies.Api.Settings;
 using Movies.Application.Features.Auth.Constants;
+using Movies.Application.Features.Auth.DTOs;
 using Movies.Application.Features.Auth.Services;
+using Movies.Application.Shared.Foundation;
 using Movies.Contracts.Requests.Auth;
 using Movies.Contracts.Responses;
 using Movies.Contracts.Responses.Auth;
@@ -11,8 +15,9 @@ using Movies.Contracts.Responses.Auth;
 namespace Movies.Api.Controllers;
 
 [ApiController]
-public class AuthController(IAuthService authService) : ControllerBase
+public class AuthController(IAuthService authService, IOptions<RefreshCookieSettings> options) : ControllerBase
 {
+    private readonly RefreshCookieSettings _refreshCookieSettings = options.Value;
     
     [HttpPost(AuthEndpoints.Register)]
     [ProducesResponseType(StatusCodes.Status201Created)]
@@ -65,7 +70,7 @@ public class AuthController(IAuthService authService) : ControllerBase
     
     
     [HttpPost(AuthEndpoints.Login)]
-    [ProducesResponseType<TokenResponse>(StatusCodes.Status200OK)]
+    [ProducesResponseType<LoginResponse>(StatusCodes.Status200OK)]
     [ProducesResponseType<AppProblemDetails>(StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> Login([FromBody] LoginRequest request, CancellationToken cancellationToken)
     {
@@ -77,22 +82,9 @@ public class AuthController(IAuthService authService) : ControllerBase
             return BadRequest(appProblemDetails);
         }
         
-        Response.Cookies.Append("refreshToken",result.Value.RefreshToken,new CookieOptions
-        {
-            HttpOnly = true,        // 👈 not accessible by JS
-            Secure = true,
-            SameSite = SameSiteMode.None, // 👈 required if frontend & backend are on different domains
-            Expires = result.Value.RefreshTokenExpiresAt, 
-            Path = AuthEndpoints.RefreshToken, // 👈 restrict to refresh endpoint
-            // Domain = ".example.com" // 👈 if using subdomains like app.example.com + api.example.com // It controls which hostnames can receive the cookie.
-            // if domains are different don't set domain
-        });
-        
-        // refresh token in JSON is only for non-browser clients. For browsers (mobile or desktop), always use HttpOnly cookie.
-        
-        
-        var tokenResponse = result.Value.ToTokenResponse();
-        return Ok(tokenResponse);
+        SendRefreshToken(result.Value.AuthTokenDto);
+        var loginResponse = result.Value.ToLoginResponse();
+        return Ok(loginResponse);
     }
 
     
@@ -113,17 +105,31 @@ public class AuthController(IAuthService authService) : ControllerBase
             return Unauthorized();
         }
         
-        Response.Cookies.Append("refreshToken",result.Value.RefreshToken,new CookieOptions
-        {
-            HttpOnly = true,        // 👈 not accessible by JS
-            Secure = true,
-            SameSite = SameSiteMode.None, // 👈 required if frontend & backend are on different domains
-            Expires = result.Value.RefreshTokenExpiresAt, 
-            Path = AuthEndpoints.RefreshToken, // 👈 restrict to refresh endpoint
-        });
+        SendRefreshToken(result.Value);
         
         var tokenResponse = result.Value.ToTokenResponse();
         return Ok(tokenResponse);
+    }
+
+    private void SendRefreshToken(AuthTokenDto authTokenDto)
+    {
+        Response.Cookies.Append("refreshToken",authTokenDto.RefreshToken,new CookieOptions
+        {
+            HttpOnly = true,        // 👈 not accessible by JS
+            Secure =  _refreshCookieSettings.Secure,
+            
+            SameSite = Enum.Parse<SameSiteMode>(_refreshCookieSettings.SameSite), 
+            // set none if frontend & backend are on different domains. if same domain then strict
+            
+            Expires = authTokenDto.RefreshTokenExpiresAt, 
+            Path = AuthEndpoints.RefreshToken, // 👈 restrict to refresh endpoint
+            Domain = _refreshCookieSettings.Domain
+            // Domain = ".example.com" // 👈 if using subdomains like app.example.com + api.example.com
+            // It controls which hostnames can receive the cookie. if domains are different don't set domain
+        });
+        
+        // refresh token in JSON is only for non-browser clients. For browsers (mobile or desktop), always use HttpOnly cookie.
+
     }
 
 

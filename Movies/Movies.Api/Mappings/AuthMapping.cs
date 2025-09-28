@@ -27,4 +27,15 @@ public static class AuthMapping
             TokenType = tokenDto.TokenType
         };
     }
+
+    public static UserResponse ToUserResponse(this UserDto userDto)
+    {
+        return new UserResponse(userDto.Name,userDto.Email,userDto.Roles);
+    }
+
+    public static LoginResponse ToLoginResponse(this LoginDto loginDto)
+    {
+        return new LoginResponse(loginDto.AuthTokenDto.ToTokenResponse(),loginDto.UserDto.ToUserResponse());
+    }
+    
 }

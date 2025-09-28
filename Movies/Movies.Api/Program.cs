@@ -6,6 +6,7 @@ using Movies.Application.Data.Seeder;
 using Scalar.AspNetCore;
 using Serilog;
 using Microsoft.IdentityModel.Protocols.Configuration;
+using Movies.Api.Settings;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -35,6 +36,8 @@ builder.Services.AddCors(options =>
         .AllowCredentials() // this is done for refresh token. It will be stored in browser cookie with httpOnly true. 
     );
 });
+
+builder.Services.Configure<RefreshCookieSettings>(builder.Configuration.GetSection("RefreshCookieSettings"));
 
 var app = builder.Build();
 
