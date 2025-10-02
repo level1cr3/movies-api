@@ -1,0 +1,129 @@
+Got it 👍 — let’s go through **both ways** of adding custom claims in ASP.NET Core Identity:
+
+---
+
+## 1️⃣ Add custom claims with `IUserClaimsPrincipalFactory<TUser>`
+
+This method works when you’re using **ASP.NET Core Identity with cookie authentication** (or anything where Identity builds the `ClaimsPrincipal` for you).
+
+### Example: add `FirstName`, `ProfilePictureUrl`, and `TenantId`
+
+```csharp
+using Microsoft.AspNetCore.Identity;
+using Microsoft.Extensions.Options;
+using System.Security.Claims;
+
+public class ApplicationUser : IdentityUser<Guid> // your custom user
+{
+    public string? FirstName { get; set; }
+    public string? ProfilePictureUrl { get; set; }
+    public Guid? TenantId { get; set; }
+}
+
+public class CustomUserClaimsPrincipalFactory 
+    : UserClaimsPrincipalFactory<ApplicationUser, IdentityRole<Guid>>
+{
+    public CustomUserClaimsPrincipalFactory(
+        UserManager<ApplicationUser> userManager,
+        RoleManager<IdentityRole<Guid>> roleManager,
+        IOptions<IdentityOptions> optionsAccessor)
+        : base(userManager, roleManager, optionsAccessor)
+    {
+    }
+
+    protected override async Task<ClaimsIdentity> GenerateClaimsAsync(ApplicationUser user)
+    {
+        var identity = await base.GenerateClaimsAsync(user);
+
+        if (!string.IsNullOrEmpty(user.FirstName))
+            identity.AddClaim(new Claim("first_name", user.FirstName));
+
+        if (!string.IsNullOrEmpty(user.ProfilePictureUrl))
+            identity.AddClaim(new Claim("profile_picture", user.ProfilePictureUrl));
+
+        if (user.TenantId.HasValue)
+            identity.AddClaim(new Claim("tenant_id", user.TenantId.ToString()!));
+
+        return identity;
+    }
+}
+```
+
+### Register it in DI
+
+```csharp
+builder.Services.AddScoped<IUserClaimsPrincipalFactory<ApplicationUser>, CustomUserClaimsPrincipalFactory>();
+```
+
+✅ Now whenever a user signs in, these extra claims will be part of `HttpContext.User`.
+
+---
+
+## 2️⃣ Add custom claims when generating JWTs
+
+This method is used when you’re issuing your own **JWT access tokens** (common in Web APIs).
+
+Suppose you’re using `JwtSecurityTokenHandler` to issue tokens. You can enrich claims like this:
+
+```csharp
+using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
+using Microsoft.IdentityModel.Tokens;
+
+public class TokenService
+{
+    private readonly UserManager<ApplicationUser> _userManager;
+
+    public TokenService(UserManager<ApplicationUser> userManager)
+    {
+        _userManager = userManager;
+    }
+
+    public async Task<string> GenerateTokenAsync(ApplicationUser user)
+    {
+        var userClaims = new List<Claim>
+        {
+            new Claim(JwtRegisteredClaimNames.Sub, user.Id.ToString()),
+            new Claim(JwtRegisteredClaimNames.Email, user.Email ?? string.Empty),
+            new Claim("first_name", user.FirstName ?? string.Empty),
+            new Claim("profile_picture", user.ProfilePictureUrl ?? string.Empty),
+            new Claim("tenant_id", user.TenantId?.ToString() ?? string.Empty)
+        };
+
+        // include roles
+        var roles = await _userManager.GetRolesAsync(user);
+        userClaims.AddRange(roles.Select(role => new Claim(ClaimTypes.Role, role)));
+
+        var key = new SymmetricSecurityKey(System.Text.Encoding.UTF8.GetBytes("your_secret_here"));
+        var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
+
+        var token = new JwtSecurityToken(
+            issuer: "your-app",
+            audience: "your-client",
+            claims: userClaims,
+            expires: DateTime.UtcNow.AddHours(1),
+            signingCredentials: creds
+        );
+
+        return new JwtSecurityTokenHandler().WriteToken(token);
+    }
+}
+```
+
+✅ Now your JWT will contain extra claims (`first_name`, `profile_picture`, `tenant_id`), and they’ll be available in `HttpContext.User` after validation.
+
+---
+
+### 🚦 When to use which?
+
+* **`IUserClaimsPrincipalFactory`** → best if you’re using **Identity cookies** or want **all ASP.NET Identity sign-ins** (including JWT issuance if integrated) to automatically include claims.
+* **JWT generation** → best when you control token creation and want fine-grained control over what goes inside tokens.
+
+👉 In many real-world apps, you **combine both**:
+
+* Add common claims in `IUserClaimsPrincipalFactory`.
+* In JWT service, take the claims from `UserManager` + `ClaimsPrincipal` and enrich as needed.
+
+---
+
+Do you want me to show you a **hybrid setup** where `IUserClaimsPrincipalFactory` feeds into JWT creation, so you don’t duplicate claim logic in two places?

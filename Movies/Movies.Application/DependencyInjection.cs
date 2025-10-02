@@ -16,6 +16,7 @@ using Movies.Application.Data.Seeder;
 using Movies.Application.Email;
 using Movies.Application.Features.Auth.Services;
 using Movies.Application.Features.Movie.Services;
+using Movies.Application.Features.UserManagement.Services;
 using Movies.Application.Settings;
 using Movies.Application.Shared.Foundation;
 
@@ -95,5 +96,7 @@ public static class DependencyInjection
         services.AddScoped<IAuthService, AuthService>();
         services.AddScoped<IMovieService, MovieService>();
         services.AddScoped<IRequestContextService, RequestContextService>();
+        services.AddScoped<ICurrentUserService, CurrentUserService>();
+        services.AddScoped<IUserService, UserService>();
     }
 }

@@ -150,7 +150,7 @@ internal class AuthService(
         }
 
         var authTokenDto = await jwtTokenGenerator.GenerateTokenAsync(user, roles, cancellationToken);
-        var userDto = new UserDto($"{user.FirstName} {user.LastName}", user.Email!, roles.ToList());
+        var userDto = new UserDto($"{user.FirstName} {user.LastName}", user.Email!, roles);
         var loginDto = new LoginDto(authTokenDto,userDto);
         return Result.Success(loginDto);
     }

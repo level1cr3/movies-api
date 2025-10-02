@@ -21,7 +21,7 @@
     </ItemGroup>
 
     <ItemGroup>
-      <Folder Include="Shared\DTOs\" />
+      <Folder Include="Features\UserManagement\DTOs\" />
       <Folder Include="Shared\Extensions\" />
       <Folder Include="Shared\Helpers\" />
       <Folder Include="Shared\Validators\" />
