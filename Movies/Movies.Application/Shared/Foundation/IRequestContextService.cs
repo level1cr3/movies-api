@@ -4,13 +4,10 @@ namespace Movies.Application.Shared.Foundation;
 
 internal interface IRequestContextService
 {
-    string GetClientIp();
+    string ClientIp { get; }
 }
 
 internal class RequestContextService(IHttpContextAccessor httpContextAccessor) : IRequestContextService
 {
-    public string GetClientIp()
-    {
-        return httpContextAccessor.HttpContext?.Connection.RemoteIpAddress?.ToString() ?? string.Empty;
-    }
+    public string ClientIp => httpContextAccessor.HttpContext?.Connection.RemoteIpAddress?.ToString() ?? string.Empty;
 }

@@ -10,6 +10,7 @@ using Movies.Application.Features.Auth.DTOs;
 using Movies.Application.Features.Auth.Errors;
 using Movies.Application.Features.Auth.Mappings;
 using Movies.Application.Settings;
+using Movies.Application.Shared.DTOs;
 using Movies.Application.Shared.Foundation;
 
 namespace Movies.Application.Features.Auth.Services;
@@ -158,7 +159,7 @@ internal class AuthService(
         CancellationToken cancellationToken = default)
     {
         var dbRefreshToken = await refreshTokenRepository.GetByRefreshTokenAsync(token, cancellationToken);
-        var clientIp = requestContextService.GetClientIp();
+        var clientIp = requestContextService.ClientIp;
 
         if (dbRefreshToken is null)
         {
@@ -187,7 +188,7 @@ internal class AuthService(
     public async Task<Result> LogoutAsync(string token, CancellationToken cancellationToken = default)
     {
         var dbRefreshToken = await refreshTokenRepository.GetByRefreshTokenAsync(token, cancellationToken);
-        var clientIp = requestContextService.GetClientIp();
+        var clientIp = requestContextService.ClientIp;
 
         if (dbRefreshToken is null || dbRefreshToken.IsRevoked)
         {

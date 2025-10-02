@@ -80,7 +80,7 @@ internal class JwtTokenGenerator(
          var refreshToken = new RefreshToken
          {
              Token = token,
-             CreatedByIp = requestContextService.GetClientIp(),
+             CreatedByIp = requestContextService.ClientIp,
              CreatedAt = now,
              ExpiresAt = now.AddDays(_jwtSettings.RefreshTokenExpiryDays),
              UserId = userId,

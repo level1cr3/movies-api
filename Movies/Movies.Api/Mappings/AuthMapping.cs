@@ -1,4 +1,5 @@
 ﻿using Movies.Application.Features.Auth.DTOs;
+using Movies.Application.Shared.DTOs;
 using Movies.Contracts.Requests.Auth;
 using Movies.Contracts.Responses.Auth;
 

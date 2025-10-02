@@ -1,3 +1,3 @@
-namespace Movies.Application.Features.Auth.DTOs;
+namespace Movies.Application.Shared.DTOs;
 
 public sealed record UserDto(string Name, string Email, List<string> Roles);
