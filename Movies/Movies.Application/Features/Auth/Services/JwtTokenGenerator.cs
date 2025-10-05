@@ -12,6 +12,7 @@ using Movies.Application.Data.Repositories.JwtRefreshToken;
 using Movies.Application.Features.Auth.DTOs;
 using Movies.Application.Settings;
 using Movies.Application.Shared.Foundation;
+using Movies.Application.Shared.Services;
 
 namespace Movies.Application.Features.Auth.Services;
 

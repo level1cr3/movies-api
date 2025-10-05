@@ -1,14 +1,14 @@
 using System.Security.Claims;
 using Microsoft.AspNetCore.Http;
 
-namespace Movies.Application.Shared.Foundation;
+namespace Movies.Application.Shared.Services;
 
 internal interface ICurrentUserService
 {
     string? UserId { get; }
     string? UserName { get; }
     string? Email { get; }
-    bool IsAuthenticated { get; }
+    bool IsAuthenticated { get; }   
     IEnumerable<string> Roles { get; }
 }
 

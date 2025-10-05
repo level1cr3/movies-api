@@ -6,6 +6,7 @@ using Movies.Application.Data.Seeder;
 using Scalar.AspNetCore;
 using Serilog;
 using Microsoft.IdentityModel.Protocols.Configuration;
+using Movies.Api.Services;
 using Movies.Api.Settings;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -37,7 +38,8 @@ builder.Services.AddCors(options =>
     );
 });
 
-builder.Services.Configure<RefreshCookieSettings>(builder.Configuration.GetSection("RefreshCookieSettings"));
+builder.Services.Configure<RefreshTokenCookieSettings>(builder.Configuration.GetSection("RefreshTokenCookieSettings"));
+builder.Services.AddScoped<IRefreshTokenCookieService, RefreshTokenCookieService>();
 
 var app = builder.Build();
 

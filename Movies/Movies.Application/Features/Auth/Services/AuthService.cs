@@ -12,6 +12,7 @@ using Movies.Application.Features.Auth.Mappings;
 using Movies.Application.Settings;
 using Movies.Application.Shared.DTOs;
 using Movies.Application.Shared.Foundation;
+using Movies.Application.Shared.Services;
 
 namespace Movies.Application.Features.Auth.Services;
 

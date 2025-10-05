@@ -3,6 +3,7 @@ using Movies.Application.Data.Entities;
 using Movies.Application.Features.UserManagement.Errors;
 using Movies.Application.Shared.DTOs;
 using Movies.Application.Shared.Foundation;
+using Movies.Application.Shared.Services;
 
 namespace Movies.Application.Features.UserManagement.Services;
 

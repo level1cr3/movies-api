@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
 using Movies.Api.Mappings;
 using Movies.Api.Routes;
+using Movies.Api.Services;
 using Movies.Api.Settings;
 using Movies.Application.Features.Auth.Constants;
 using Movies.Application.Features.Auth.DTOs;
@@ -15,9 +16,8 @@ using Movies.Contracts.Responses.Auth;
 namespace Movies.Api.Controllers;
 
 [ApiController]
-public class AuthController(IAuthService authService, IOptions<RefreshCookieSettings> options) : ControllerBase
+public class AuthController(IAuthService authService, IRefreshTokenCookieService refreshTokenCookieService) : ControllerBase
 {
-    private readonly RefreshCookieSettings _refreshCookieSettings = options.Value;
     
     [HttpPost(AuthEndpoints.Register)]
     [ProducesResponseType(StatusCodes.Status201Created)]
@@ -81,8 +81,10 @@ public class AuthController(IAuthService authService, IOptions<RefreshCookieSett
             var appProblemDetails = result.AppErrors.ToAppProblemDetails(HttpContext);
             return BadRequest(appProblemDetails);
         }
+
+        var authToken = result.Value.AuthTokenDto;
+        refreshTokenCookieService.SendRefreshToken(authToken.RefreshToken,authToken.RefreshTokenExpiresAt);
         
-        SendRefreshToken(result.Value.AuthTokenDto);
         var loginResponse = result.Value.ToLoginResponse();
         return Ok(loginResponse);
     }
@@ -93,7 +95,9 @@ public class AuthController(IAuthService authService, IOptions<RefreshCookieSett
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     public async Task<IActionResult> RefreshToken(CancellationToken cancellationToken)
     {
-        if (!Request.Cookies.TryGetValue("refreshToken", out var refreshToken))
+        var refreshToken= refreshTokenCookieService.GetRefreshToken();
+
+        if (refreshToken is null)
         {
             return Unauthorized();
         }
@@ -105,31 +109,10 @@ public class AuthController(IAuthService authService, IOptions<RefreshCookieSett
             return Unauthorized();
         }
         
-        SendRefreshToken(result.Value);
-        
-        var tokenResponse = result.Value.ToTokenResponse();
+        var authToken = result.Value;
+        refreshTokenCookieService.SendRefreshToken(authToken.RefreshToken,authToken.RefreshTokenExpiresAt);
+        var tokenResponse = authToken.ToTokenResponse();
         return Ok(tokenResponse);
-    }
-
-    private void SendRefreshToken(AuthTokenDto authTokenDto)
-    {
-        Response.Cookies.Append("refreshToken",authTokenDto.RefreshToken,new CookieOptions
-        {
-            HttpOnly = true,        // 👈 not accessible by JS
-            Secure =  _refreshCookieSettings.Secure,
-            
-            SameSite = Enum.Parse<SameSiteMode>(_refreshCookieSettings.SameSite), 
-            // set none if frontend & backend are on different domains. if same domain then strict
-            
-            Expires = authTokenDto.RefreshTokenExpiresAt, 
-            Path = AuthEndpoints.RefreshToken, // 👈 restrict to refresh endpoint
-            Domain = _refreshCookieSettings.Domain
-            // Domain = ".example.com" // 👈 if using subdomains like app.example.com + api.example.com
-            // It controls which hostnames can receive the cookie. if domains are different don't set domain
-        });
-        
-        // refresh token in JSON is only for non-browser clients. For browsers (mobile or desktop), always use HttpOnly cookie.
-
     }
 
 
@@ -137,10 +120,20 @@ public class AuthController(IAuthService authService, IOptions<RefreshCookieSett
     [HttpPost(AuthEndpoints.Logout)]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType<AppProblemDetails>(StatusCodes.Status400BadRequest)]
-    public async Task<IActionResult> Logout([FromBody] LogoutRequest request, CancellationToken cancellationToken)
+    public async Task<IActionResult> Logout(CancellationToken cancellationToken)
     {
-        var result = await authService.LogoutAsync(request.RefreshToken,cancellationToken);
+        //TODO : during logout how can i get refresh token from cookie ?. when it is bound to only refresh token path ?
+        var refreshToken= refreshTokenCookieService.GetRefreshToken();
 
+        if (refreshToken is null)
+        {
+            refreshTokenCookieService.DeleteRefreshToken();
+            return Ok();
+        }
+        
+        var result = await authService.LogoutAsync(refreshToken,cancellationToken);
+        refreshTokenCookieService.DeleteRefreshToken();
+        
         if (result.IsFailure)
         {
             var appProblemDetails = result.AppErrors.ToAppProblemDetails(HttpContext);
@@ -150,7 +143,7 @@ public class AuthController(IAuthService authService, IOptions<RefreshCookieSett
         return Ok();
     }
 
-    
+
     [HttpPost(AuthEndpoints.ForgotPassword)]
     [ProducesResponseType(StatusCodes.Status200OK)]
     public async Task<IActionResult> ForgotPassword([FromBody] ForgotPasswordRequest request, CancellationToken cancellationToken)

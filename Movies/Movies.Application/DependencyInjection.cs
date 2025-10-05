@@ -19,6 +19,7 @@ using Movies.Application.Features.Movie.Services;
 using Movies.Application.Features.UserManagement.Services;
 using Movies.Application.Settings;
 using Movies.Application.Shared.Foundation;
+using Movies.Application.Shared.Services;
 
 namespace Movies.Application;
 

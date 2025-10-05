@@ -1,6 +1,6 @@
 ﻿using Microsoft.AspNetCore.Http;
 
-namespace Movies.Application.Shared.Foundation;
+namespace Movies.Application.Shared.Services;
 
 internal interface IRequestContextService
 {
