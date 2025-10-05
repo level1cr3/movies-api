@@ -31,7 +31,10 @@ public static class AuthMapping
 
     public static UserResponse ToUserResponse(this UserDto userDto)
     {
-        return new UserResponse(userDto.Name,userDto.Email,userDto.Roles);
+        return new UserResponse(userDto.Id,
+            userDto.Name,
+            userDto.Email,
+            userDto.Roles);
     }
 
     public static LoginResponse ToLoginResponse(this LoginDto loginDto)

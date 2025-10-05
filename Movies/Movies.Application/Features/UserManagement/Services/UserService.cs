@@ -27,7 +27,11 @@ internal class UserService(
 
         var roles = await userManager.GetRolesAsync(user);
 
-        var userDto = new UserDto($"{user.FirstName} {user.LastName}",user.Email!, roles);
+        var fullname = $"{user.FirstName} {user.LastName}";
+        var userDto = new UserDto(user.Id,
+            fullname,
+            user.Email!,
+            roles);
         return Result.Success(userDto);
     }
 }
